@@ -1,0 +1,30 @@
+{% load static %}
+<header class="navbar" id="navbar">
+  <div class="container navbar__inner">
+    <a href="{% url 'home' %}" class="brand">
+      <svg class="brand__mark" viewBox="0 0 48 48" aria-hidden="true"><use href="#icon-knight"></use></svg>
+      <span class="brand__name">
+        TAL Chess Academy
+        <small>Est. Discipline &amp; Depth</small>
+      </span>
+    </a>
+
+    <nav class="nav-links" id="nav-links" aria-label="Primary">
+      <a href="{% url 'home' %}"{% if request.resolver_match.url_name == 'home' %} class="is-active"{% endif %}>Home</a>
+      <a href="{% url 'about' %}"{% if request.resolver_match.url_name == 'about' %} class="is-active"{% endif %}>About</a>
+      <a href="{% url 'programs' %}"{% if request.resolver_match.url_name == 'programs' %} class="is-active"{% endif %}>Programs</a>
+      <a href="{% url 'coaches' %}"{% if request.resolver_match.url_name == 'coaches' or request.resolver_match.url_name == 'coach_detail' %} class="is-active"{% endif %}>Coaches</a>
+      <a href="{% url 'achievements' %}"{% if request.resolver_match.url_name == 'achievements' %} class="is-active"{% endif %}>Achievements</a>
+      <a href="{% url 'events' %}"{% if request.resolver_match.url_name == 'events' %} class="is-active"{% endif %}>Events</a>
+      <a href="{% url 'contact' %}"{% if request.resolver_match.url_name == 'contact' %} class="is-active"{% endif %}>Contact</a>
+      <a href="{% url 'contact' %}" class="btn btn-primary">Book a Trial</a>
+    </nav>
+
+    <div class="navbar__actions">
+      <a href="{% url 'contact' %}" class="btn btn-primary">Book a Trial</a>
+      <button class="nav-toggle" id="nav-toggle" aria-label="Toggle menu" aria-expanded="false" aria-controls="nav-links">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </div>
+</header>

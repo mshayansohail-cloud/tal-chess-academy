@@ -1,0 +1,80 @@
+/* Scroll-reveal: JS toggles .is-visible on elements carrying [data-reveal] */
+
+[data-reveal] {
+  opacity: 0;
+  transform: translateY(14px);
+  transition: opacity var(--duration-slow) var(--ease-out), transform var(--duration-slow) var(--ease-out);
+}
+
+[data-reveal].is-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+[data-reveal-group] > * {
+  opacity: 0;
+  transform: translateY(14px);
+  transition: opacity var(--duration-slow) var(--ease-out), transform var(--duration-slow) var(--ease-out);
+}
+
+[data-reveal-group].is-visible > * {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+[data-reveal-group].is-visible > *:nth-child(1) { transition-delay: 0ms; }
+[data-reveal-group].is-visible > *:nth-child(2) { transition-delay: 80ms; }
+[data-reveal-group].is-visible > *:nth-child(3) { transition-delay: 160ms; }
+[data-reveal-group].is-visible > *:nth-child(4) { transition-delay: 240ms; }
+[data-reveal-group].is-visible > *:nth-child(5) { transition-delay: 320ms; }
+[data-reveal-group].is-visible > *:nth-child(6) { transition-delay: 400ms; }
+
+/* Fade-in for the page shell on load */
+
+.page-enter {
+  animation: page-fade var(--duration-slow) var(--ease-out);
+}
+
+@keyframes page-fade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* Image hover treatment: scale within an overflow-hidden container */
+
+.img-hover {
+  overflow: hidden;
+}
+
+.img-hover img,
+.img-hover .coach-card__monogram {
+  transition: transform var(--duration-slow) var(--ease-out);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  [data-reveal],
+  [data-reveal-group] > * {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+
+  .page-enter {
+    animation: none;
+  }
+
+  * {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+}

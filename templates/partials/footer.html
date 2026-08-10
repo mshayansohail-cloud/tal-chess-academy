@@ -1,0 +1,58 @@
+{% load static %}
+<footer class="footer">
+  <div class="container">
+    <div class="footer__grid">
+      <div class="footer__brand">
+        <a href="{% url 'home' %}" class="brand">
+          <svg class="brand__mark" viewBox="0 0 48 48" aria-hidden="true"><use href="#icon-knight"></use></svg>
+          <span class="brand__name">
+            TAL Chess Academy
+            <small>Est. Discipline &amp; Depth</small>
+          </span>
+        </a>
+        <p class="footer__tagline">A structured path from first moves to tournament mastery, led by titled coaches.</p>
+        <div class="footer__social">
+          <a href="#" aria-label="Instagram"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#icon-instagram"></use></svg></a>
+          <a href="#" aria-label="Facebook"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#icon-facebook"></use></svg></a>
+          <a href="#" aria-label="YouTube"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#icon-youtube"></use></svg></a>
+        </div>
+      </div>
+
+      <nav aria-label="Site">
+        <h3 class="footer__heading">Navigate</h3>
+        <ul class="footer__links">
+          <li><a href="{% url 'about' %}">About</a></li>
+          <li><a href="{% url 'programs' %}">Programs</a></li>
+          <li><a href="{% url 'coaches' %}">Coaches</a></li>
+          <li><a href="{% url 'achievements' %}">Achievements</a></li>
+          <li><a href="{% url 'events' %}">Events</a></li>
+        </ul>
+      </nav>
+
+      <nav aria-label="Programs">
+        <h3 class="footer__heading">Programs</h3>
+        <ul class="footer__links">
+          <li><a href="{% url 'programs' %}">Junior</a></li>
+          <li><a href="{% url 'programs' %}">Beginner</a></li>
+          <li><a href="{% url 'programs' %}">Intermediate</a></li>
+          <li><a href="{% url 'programs' %}">Advanced</a></li>
+          <li><a href="{% url 'programs' %}">Private Coaching</a></li>
+        </ul>
+      </nav>
+
+      <div>
+        <h3 class="footer__heading">Contact</h3>
+        <ul class="footer__links">
+          <li><a href="mailto:info@talchessacademy.example">info@talchessacademy.example</a></li>
+          <li><a href="tel:+10000000000">+1 (000) 000-0000</a></li>
+          <li><span>Academy Hall, Downtown Centre</span></li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="footer__bottom">
+      <span>&copy; {% now "Y" %} TAL Chess Academy. All rights reserved.</span>
+      <span>Discipline. Depth. Distinction.</span>
+    </div>
+  </div>
+</footer>

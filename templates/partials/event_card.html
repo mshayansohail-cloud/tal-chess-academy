@@ -1,0 +1,11 @@
+{% comment %} Expects: event (dict) {% endcomment %}
+<article class="event-card">
+  <p class="event-card__date">{{ event.date_label }}</p>
+  <h3 class="event-card__name">{{ event.name }}</h3>
+  <p class="event-card__location">{{ event.location }}</p>
+  <p class="event-card__desc">{{ event.description }}</p>
+  <a href="{% url 'events' %}" class="btn-text">
+    Event details
+    <svg viewBox="0 0 24 24" aria-hidden="true"><use href="#icon-arrow"></use></svg>
+  </a>
+</article>

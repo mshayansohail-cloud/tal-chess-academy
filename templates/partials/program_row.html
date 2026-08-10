@@ -1,0 +1,13 @@
+{% comment %} Expects: program (dict) {% endcomment %}
+<div class="program-row" data-reveal>
+  <svg class="program-row__icon" viewBox="0 0 48 48" aria-hidden="true"><use href="#icon-{{ program.piece }}"></use></svg>
+  <div>
+    <span class="program-row__age">{{ program.age }}</span>
+    <h3 class="program-row__name">{{ program.name }}</h3>
+    <p class="program-row__summary">{{ program.summary }}</p>
+  </div>
+  <a href="{% url 'programs' %}" class="btn-text">
+    {{ program.cta }}
+    <svg viewBox="0 0 24 24" aria-hidden="true"><use href="#icon-arrow"></use></svg>
+  </a>
+</div>

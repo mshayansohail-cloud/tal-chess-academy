@@ -1,0 +1,16 @@
+{% comment %} Expects: coach (dict) {% endcomment %}
+<a href="{% url 'coach_detail' coach.slug %}" class="coach-card img-hover">
+  <div class="coach-card__photo">
+    <span class="coach-card__monogram">{{ coach.initials }}</span>
+    <span class="coach-card__rating">{{ coach.rating }}</span>
+  </div>
+  <div class="coach-card__body">
+    <p class="coach-card__title">{{ coach.title }}</p>
+    <h3 class="coach-card__name">{{ coach.name }}</h3>
+    <p class="coach-card__summary">{{ coach.summary }}</p>
+    <span class="coach-card__link">
+      View profile
+      <svg viewBox="0 0 24 24" aria-hidden="true"><use href="#icon-arrow"></use></svg>
+    </span>
+  </div>
+</a>

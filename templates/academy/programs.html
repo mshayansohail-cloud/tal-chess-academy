@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+
+{% block title %}Programs — TAL Chess Academy{% endblock %}
+{% block meta_description %}Structured chess programmes for juniors, beginners, intermediate and advanced players, plus private coaching.{% endblock %}
+
+{% block content %}
+
+<header class="page-header">
+  <div class="container">
+    <p class="breadcrumb"><a href="{% url 'home' %}">Home</a> / Programs</p>
+    <h1 class="page-header__title">A programme for every stage of the game</h1>
+    <p class="page-header__desc">
+      Each level has its own curriculum, its own pace, and its own goals — so students are always
+      working on what actually moves their game forward.
+    </p>
+  </div>
+</header>
+
+<section class="section">
+  <div class="container">
+    <div class="program-list">
+      {% for program in programs %}
+        {% include "partials/program_row.html" %}
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+<section class="section final-cta">
+  <div class="container">
+    <h2 class="final-cta__title">Not sure which programme fits?</h2>
+    <p class="final-cta__desc">Book a trial lesson and we'll place you at the right level after a short assessment.</p>
+    <div class="final-cta__actions">
+      <a href="{% url 'contact' %}" class="btn btn-primary">Book a Trial</a>
+    </div>
+  </div>
+</section>
+
+{% endblock %}

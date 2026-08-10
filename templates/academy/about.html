@@ -1,0 +1,77 @@
+{% extends "base.html" %}
+
+{% block title %}About — TAL Chess Academy{% endblock %}
+{% block meta_description %}The story, mission, and teaching philosophy behind TAL Chess Academy.{% endblock %}
+
+{% block content %}
+
+<header class="page-header">
+  <div class="container">
+    <p class="breadcrumb"><a href="{% url 'home' %}">Home</a> / About</p>
+    <h1 class="page-header__title">Discipline first. Results follow.</h1>
+    <p class="page-header__desc">
+      TAL Chess Academy exists for players who want to take chess seriously — and coaches who take
+      teaching just as seriously.
+    </p>
+  </div>
+</header>
+
+<section class="section">
+  <div class="container about-split">
+    <div data-reveal>
+      <p class="section-label">Our Story</p>
+      <p class="about-split__lead">Founded by competitors, for competitors.</p>
+    </div>
+    <div class="about-split__body" data-reveal>
+      <p>
+        TAL Chess Academy was founded by a group of titled players who shared one frustration: most chess
+        instruction stops at "how the pieces move" and never builds toward the calculation, preparation,
+        and composure a rated tournament actually demands.
+      </p>
+      <p>
+        We built the Academy around a simple structure — clear levels, a defined curriculum at each one,
+        and coaches who are still active tournament competitors themselves. Students don't just learn
+        theory; they learn how a title-holder actually thinks at the board.
+      </p>
+      <p>
+        Today the Academy trains juniors and adults across five programmes, runs its own internal
+        tournament calendar, and has produced dozens of rated and nationally ranked players.
+      </p>
+    </div>
+  </div>
+</section>
+
+<section class="section surface-inverse">
+  <div class="container">
+    <div class="section-head">
+      <div>
+        <p class="section-label">Our Philosophy</p>
+        <h2 class="section-title">Depth over breadth</h2>
+      </div>
+      <p class="section-intro">Five principles that shape every lesson we teach.</p>
+    </div>
+
+    <div class="why-grid" data-reveal-group>
+      {% for item in why_us %}
+        <div class="why-item">
+          <span class="why-item__index">0{{ forloop.counter }}</span>
+          <h3 class="why-item__title">{{ item.title }}</h3>
+          <p class="why-item__desc">{{ item.description }}</p>
+        </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+<section class="section final-cta">
+  <div class="container">
+    <h2 class="final-cta__title">See the philosophy in practice</h2>
+    <p class="final-cta__desc">The best way to understand how we teach is to sit in on a lesson.</p>
+    <div class="final-cta__actions">
+      <a href="{% url 'contact' %}" class="btn btn-primary">Book a Trial</a>
+      <a href="{% url 'coaches' %}" class="btn btn-ghost">Meet the Coaches</a>
+    </div>
+  </div>
+</section>
+
+{% endblock %}

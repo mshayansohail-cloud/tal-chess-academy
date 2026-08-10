@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+
+{% block title %}Coaches — TAL Chess Academy{% endblock %}
+{% block meta_description %}Meet the FIDE-titled coaches at TAL Chess Academy.{% endblock %}
+
+{% block content %}
+
+<header class="page-header">
+  <div class="container">
+    <p class="breadcrumb"><a href="{% url 'home' %}">Home</a> / Coaches</p>
+    <h1 class="page-header__title">Learn from players who have sat across the board</h1>
+    <p class="page-header__desc">
+      Every coach on our roster holds a FIDE title and continues to compete. They teach from
+      experience, not just theory.
+    </p>
+  </div>
+</header>
+
+<section class="section">
+  <div class="container">
+    <div class="coach-grid" data-reveal-group>
+      {% for coach in coaches %}
+        {% include "partials/coach_card.html" %}
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+{% endblock %}

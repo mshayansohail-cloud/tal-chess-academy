@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+
+{% block title %}{{ coach.name }} — TAL Chess Academy{% endblock %}
+{% block meta_description %}{{ coach.summary }}{% endblock %}
+
+{% block content %}
+
+<header class="page-header">
+  <div class="container">
+    <p class="breadcrumb"><a href="{% url 'home' %}">Home</a> / <a href="{% url 'coaches' %}">Coaches</a> / {{ coach.name }}</p>
+  </div>
+</header>
+
+<section class="section" style="padding-top:0">
+  <div class="container coach-detail">
+    <div data-reveal>
+      <div class="coach-detail__photo">
+        <span class="coach-detail__monogram">{{ coach.initials }}</span>
+      </div>
+    </div>
+
+    <div data-reveal>
+      <p class="section-label">{{ coach.title }} &middot; Rating {{ coach.rating }}</p>
+      <h1 class="section-title" style="font-size:var(--fs-2xl)">{{ coach.name }}</h1>
+      <p class="section-intro" style="max-width:60ch;margin-top:var(--space-4)">{{ coach.bio }}</p>
+
+      <div class="coach-detail__focus">
+        {% for area in coach.focus %}
+          <span class="tag">{{ area }}</span>
+        {% endfor %}
+      </div>
+
+      <a href="{% url 'contact' %}" class="btn btn-primary" style="margin-top:var(--space-7)">Book a Trial with {{ coach.name }}</a>
+    </div>
+  </div>
+</section>
+
+<section class="section surface-secondary section--tight">
+  <div class="container">
+    <div class="section-head">
+      <div>
+        <p class="section-label">More Coaches</p>
+        <h2 class="section-title">The full roster</h2>
+      </div>
+      <a href="{% url 'coaches' %}" class="btn-text">
+        View all
+        <svg viewBox="0 0 24 24" aria-hidden="true"><use href="#icon-arrow"></use></svg>
+      </a>
+    </div>
+  </div>
+</section>
+
+{% endblock %}

@@ -1,0 +1,196 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+
+<section class="hero">
+  <div class="hero__grid" aria-hidden="true"></div>
+  <div class="container hero__inner">
+    <div>
+      <p class="eyebrow hero__eyebrow">TAL Chess Academy</p>
+      <h1 class="hero__title">Think deeper.<br>Play with <em>intention</em>.</h1>
+      <p class="hero__desc">
+        A structured training ground for players who want to compete — not just play.
+        FIDE-titled coaches, a disciplined curriculum, and a culture built around the board.
+      </p>
+      <div class="hero__actions">
+        <a href="{% url 'contact' %}" class="btn btn-primary">Book a Trial</a>
+        <a href="{% url 'programs' %}" class="btn btn-ghost">Explore Programs</a>
+      </div>
+    </div>
+
+    <div class="hero__visual" data-reveal>
+      <div class="hero__visual-frame"></div>
+      <span class="hero__coord hero__coord--tl">01 / 06</span>
+      <span class="hero__coord hero__coord--br">Est. Discipline</span>
+      <svg class="hero__knight" viewBox="0 0 48 48" aria-hidden="true"><use href="#icon-knight"></use></svg>
+    </div>
+  </div>
+</section>
+
+<section class="section surface-inverse" id="about" aria-labelledby="about-title">
+  <div class="container">
+    <div class="about-split">
+      <div data-reveal>
+        <p class="section-label">02 / About the Academy</p>
+        <p class="about-split__lead" id="about-title">
+          We believe chess is taught best as a discipline — not a hobby squeezed in on weekends.
+        </p>
+      </div>
+      <div class="about-split__body" data-reveal>
+        <p>
+          TAL Chess Academy was founded on the conviction that serious improvement requires structure:
+          a real curriculum, real feedback, and coaches who have competed at the level students aspire to.
+          We train juniors and adults alike, from their very first lesson through their first rated tournament
+          and beyond.
+        </p>
+        <p>
+          Every programme is built around the same principle — depth over breadth. Fewer openings, understood
+          properly. Fewer positions, calculated thoroughly. It is a slower path, and it is the one that produces
+          players who can actually hold their own across the board.
+        </p>
+        <a href="{% url 'about' %}" class="btn-text">
+          Read our full story
+          <svg viewBox="0 0 24 24" aria-hidden="true"><use href="#icon-arrow"></use></svg>
+        </a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section" id="programs" aria-labelledby="programs-title">
+  <div class="container">
+    <div class="section-head">
+      <div>
+        <p class="section-label">03 / Programs</p>
+        <h2 class="section-title" id="programs-title">A structured path for every level</h2>
+      </div>
+      <p class="section-intro">From a child's first lesson to tournament-level private coaching — each stage
+        builds deliberately on the last.</p>
+    </div>
+
+    <div class="program-list">
+      {% for program in programs %}
+        {% include "partials/program_row.html" %}
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+<section class="section section--tight surface-secondary" id="why-us" aria-labelledby="why-title">
+  <div class="container">
+    <div class="section-head">
+      <div>
+        <p class="section-label">04 / Why TAL Chess Academy</p>
+        <h2 class="section-title" id="why-title">What sets our training apart</h2>
+      </div>
+    </div>
+
+    <div class="why-grid" data-reveal-group>
+      {% for item in why_us %}
+        <div class="why-item">
+          <span class="why-item__index">0{{ forloop.counter }}</span>
+          <h3 class="why-item__title">{{ item.title }}</h3>
+          <p class="why-item__desc">{{ item.description }}</p>
+        </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+<section class="section" id="coaches" aria-labelledby="coaches-title">
+  <div class="container">
+    <div class="section-head">
+      <div>
+        <p class="section-label">05 / Coaches</p>
+        <h2 class="section-title" id="coaches-title">Learn from titled players</h2>
+      </div>
+      <a href="{% url 'coaches' %}" class="btn-text">
+        View all coaches
+        <svg viewBox="0 0 24 24" aria-hidden="true"><use href="#icon-arrow"></use></svg>
+      </a>
+    </div>
+
+    <div class="coach-grid" data-reveal-group>
+      {% for coach in coaches %}
+        {% include "partials/coach_card.html" %}
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+<section class="section surface-inverse" id="achievements" aria-labelledby="achievements-title">
+  <div class="container">
+    <div class="section-head">
+      <div>
+        <p class="section-label">06 / Achievements</p>
+        <h2 class="section-title" id="achievements-title">A record built over a decade</h2>
+      </div>
+      <a href="{% url 'achievements' %}" class="btn-text">
+        Full history
+        <svg viewBox="0 0 24 24" aria-hidden="true"><use href="#icon-arrow"></use></svg>
+      </a>
+    </div>
+
+    <div class="stats-row" data-reveal>
+      {% for stat in stats %}
+        {% include "partials/stat.html" %}
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+<section class="section" id="events" aria-labelledby="events-title">
+  <div class="container">
+    <div class="section-head">
+      <div>
+        <p class="section-label">07 / Upcoming Events</p>
+        <h2 class="section-title" id="events-title">Compete beyond the classroom</h2>
+      </div>
+      <a href="{% url 'events' %}" class="btn-text">
+        All events
+        <svg viewBox="0 0 24 24" aria-hidden="true"><use href="#icon-arrow"></use></svg>
+      </a>
+    </div>
+
+    <div class="event-grid" data-reveal-group>
+      {% for event in events %}
+        {% include "partials/event_card.html" %}
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+<section class="section section--tight surface-secondary" id="testimonials" aria-labelledby="testimonials-title">
+  <div class="container">
+    <div class="section-head">
+      <div>
+        <p class="section-label">08 / Testimonials</p>
+        <h2 class="section-title" id="testimonials-title">What our students say</h2>
+      </div>
+    </div>
+
+    <div class="testimonial-grid" data-reveal-group>
+      {% for testimonial in testimonials %}
+        {% include "partials/testimonial.html" %}
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+<section class="section final-cta" id="join" aria-labelledby="final-cta-title">
+  <div class="container">
+    <p class="section-label" style="justify-content:center">09 / Get Started</p>
+    <h2 class="final-cta__title" id="final-cta-title">Ready to improve your game?</h2>
+    <p class="final-cta__desc">
+      Book a trial lesson and sit across the board from a coach who will show you exactly where your game
+      needs work — and how to fix it.
+    </p>
+    <div class="final-cta__actions">
+      <a href="{% url 'contact' %}" class="btn btn-primary">Book a Trial</a>
+      <a href="{% url 'contact' %}" class="btn btn-ghost">Contact Us</a>
+    </div>
+  </div>
+</section>
+
+{% endblock %}

@@ -1,0 +1,79 @@
+{% extends "base.html" %}
+
+{% block title %}Contact — TAL Chess Academy{% endblock %}
+{% block meta_description %}Book a trial lesson or get in touch with TAL Chess Academy.{% endblock %}
+
+{% block content %}
+
+<header class="page-header">
+  <div class="container">
+    <p class="breadcrumb"><a href="{% url 'home' %}">Home</a> / Contact</p>
+    <h1 class="page-header__title">Ready to improve your game?</h1>
+    <p class="page-header__desc">
+      Book a trial lesson or send us a message — we typically reply within one business day.
+    </p>
+  </div>
+</header>
+
+<section class="section">
+  <div class="container contact-layout">
+    <div data-reveal>
+      <p class="section-label">Get in touch</p>
+      <div class="contact-info__item">
+        <p class="contact-info__label">Email</p>
+        <p class="contact-info__value"><a href="mailto:info@talchessacademy.example">info@talchessacademy.example</a></p>
+      </div>
+      <div class="contact-info__item">
+        <p class="contact-info__label">Phone</p>
+        <p class="contact-info__value"><a href="tel:+10000000000">+1 (000) 000-0000</a></p>
+      </div>
+      <div class="contact-info__item">
+        <p class="contact-info__label">Location</p>
+        <p class="contact-info__value">Academy Hall, Downtown Centre</p>
+      </div>
+      <div class="contact-info__item">
+        <p class="contact-info__label">Hours</p>
+        <p class="contact-info__value">Monday – Saturday, 9am – 7pm</p>
+      </div>
+    </div>
+
+    <div data-reveal>
+      {% if messages %}
+        {% for message in messages %}
+          <p class="form-success">{{ message }}</p>
+        {% endfor %}
+      {% endif %}
+
+      <form method="post" novalidate>
+        {% csrf_token %}
+        <div class="form-row form-row--split">
+          <div>
+            <label class="form-label" for="{{ form.name.id_for_label }}">Name</label>
+            {{ form.name }}
+            {% if form.name.errors %}<p class="form-errors">{{ form.name.errors|striptags }}</p>{% endif %}
+          </div>
+          <div>
+            <label class="form-label" for="{{ form.email.id_for_label }}">Email</label>
+            {{ form.email }}
+            {% if form.email.errors %}<p class="form-errors">{{ form.email.errors|striptags }}</p>{% endif %}
+          </div>
+        </div>
+
+        <div class="form-row">
+          <label class="form-label" for="{{ form.phone.id_for_label }}">Phone</label>
+          {{ form.phone }}
+        </div>
+
+        <div class="form-row">
+          <label class="form-label" for="{{ form.message.id_for_label }}">Message</label>
+          {{ form.message }}
+          {% if form.message.errors %}<p class="form-errors">{{ form.message.errors|striptags }}</p>{% endif %}
+        </div>
+
+        <button type="submit" class="btn btn-primary">Send Message</button>
+      </form>
+    </div>
+  </div>
+</section>
+
+{% endblock %}

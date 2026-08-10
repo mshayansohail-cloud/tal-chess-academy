@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+
+{% block title %}Events — TAL Chess Academy{% endblock %}
+{% block meta_description %}Upcoming tournaments and events at TAL Chess Academy.{% endblock %}
+
+{% block content %}
+
+<header class="page-header">
+  <div class="container">
+    <p class="breadcrumb"><a href="{% url 'home' %}">Home</a> / Events</p>
+    <h1 class="page-header__title">Compete beyond the classroom</h1>
+    <p class="page-header__desc">
+      Regular internal and invitational tournaments keep training grounded in real competitive pressure.
+    </p>
+  </div>
+</header>
+
+<section class="section">
+  <div class="container">
+    <div class="event-grid" data-reveal-group>
+      {% for event in events %}
+        {% include "partials/event_card.html" %}
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+<section class="section final-cta surface-secondary">
+  <div class="container">
+    <h2 class="final-cta__title">Want to compete in our next event?</h2>
+    <p class="final-cta__desc">Academy students of all levels are welcome to enter — speak to your coach or contact us to register.</p>
+    <div class="final-cta__actions">
+      <a href="{% url 'contact' %}" class="btn btn-primary">Contact Us</a>
+    </div>
+  </div>
+</section>
+
+{% endblock %}
