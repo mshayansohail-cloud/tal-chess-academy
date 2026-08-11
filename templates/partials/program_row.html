@@ -1,13 +1,13 @@
-{% comment %} Expects: program (dict) {% endcomment %}
+{% comment %} Expects: program (Program instance) {% endcomment %}
 <div class="program-row" data-reveal>
-  <svg class="program-row__icon" viewBox="0 0 48 48" aria-hidden="true"><use href="#icon-{{ program.piece }}"></use></svg>
+  <svg class="program-row__icon" viewBox="0 0 48 48" aria-hidden="true"><use href="#icon-{{ program.icon }}"></use></svg>
   <div>
-    <span class="program-row__age">{{ program.age }}</span>
+    <span class="program-row__age">{{ program.age_group }}{% if program.duration %} · {{ program.duration }}{% endif %}</span>
     <h3 class="program-row__name">{{ program.name }}</h3>
-    <p class="program-row__summary">{{ program.summary }}</p>
+    <p class="program-row__summary">{{ program.description }}</p>
   </div>
-  <a href="{% url 'programs' %}" class="btn-text">
-    {{ program.cta }}
+  <a href="{% url 'contact' %}?program={{ program.slug }}" class="btn-text">
+    {{ program.cta_label }}
     <svg viewBox="0 0 24 24" aria-hidden="true"><use href="#icon-arrow"></use></svg>
   </a>
 </div>

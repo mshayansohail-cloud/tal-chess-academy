@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% load static %}
 
 {% block title %}Contact — TAL Chess Academy{% endblock %}
 {% block meta_description %}Book a trial lesson or get in touch with TAL Chess Academy.{% endblock %}
@@ -10,7 +11,7 @@
     <p class="breadcrumb"><a href="{% url 'home' %}">Home</a> / Contact</p>
     <h1 class="page-header__title">Ready to improve your game?</h1>
     <p class="page-header__desc">
-      Book a trial lesson or send us a message — we typically reply within one business day.
+      Book a trial lesson or send us a general enquiry — we typically reply within one business day.
     </p>
   </div>
 </header>
@@ -38,42 +39,147 @@
     </div>
 
     <div data-reveal>
-      {% if messages %}
-        {% for message in messages %}
-          <p class="form-success">{{ message }}</p>
-        {% endfor %}
-      {% endif %}
+      <div class="form-tabs" role="tablist" aria-label="Choose a form">
+        <button type="button" class="form-tab is-active" id="tab-trial" role="tab"
+                aria-selected="true" aria-controls="panel-trial" data-tab-target="panel-trial">
+          Book a Trial
+        </button>
+        <button type="button" class="form-tab" id="tab-enquiry" role="tab"
+                aria-selected="false" aria-controls="panel-enquiry" data-tab-target="panel-enquiry">
+          General Enquiry
+        </button>
+      </div>
 
-      <form method="post" novalidate>
-        {% csrf_token %}
-        <div class="form-row form-row--split">
-          <div>
-            <label class="form-label" for="{{ form.name.id_for_label }}">Name</label>
-            {{ form.name }}
-            {% if form.name.errors %}<p class="form-errors">{{ form.name.errors|striptags }}</p>{% endif %}
+      <div id="form-feedback" class="form-feedback" role="status" aria-live="polite" hidden></div>
+
+      <div id="panel-trial" class="form-panel" role="tabpanel" aria-labelledby="tab-trial">
+        <form id="trial-form" data-api-url="/api/registrations/" novalidate>
+          <div class="form-row form-row--split">
+            <div>
+              <label class="form-label" for="id_student_name">Student name</label>
+              <input class="form-input" type="text" id="id_student_name" name="student_name" maxlength="120" required>
+              <p class="form-errors" data-error-for="student_name"></p>
+            </div>
+            <div>
+              <label class="form-label" for="id_parent_name">Parent/Guardian name</label>
+              <input class="form-input" type="text" id="id_parent_name" name="parent_name" maxlength="120"
+                     placeholder="Leave blank for adult students">
+              <p class="form-errors" data-error-for="parent_name"></p>
+            </div>
           </div>
-          <div>
-            <label class="form-label" for="{{ form.email.id_for_label }}">Email</label>
-            {{ form.email }}
-            {% if form.email.errors %}<p class="form-errors">{{ form.email.errors|striptags }}</p>{% endif %}
+
+          <div class="form-row form-row--split">
+            <div>
+              <label class="form-label" for="id_student_age">Student age</label>
+              <input class="form-input" type="number" id="id_student_age" name="student_age" min="3" max="100" required>
+              <p class="form-errors" data-error-for="student_age"></p>
+            </div>
+            <div>
+              <label class="form-label" for="id_chess_level">Chess experience</label>
+              <select class="form-input" id="id_chess_level" name="chess_level" required>
+                <option value="none">Never played</option>
+                <option value="beginner">Beginner</option>
+                <option value="intermediate">Intermediate</option>
+                <option value="advanced">Advanced</option>
+              </select>
+              <p class="form-errors" data-error-for="chess_level"></p>
+            </div>
           </div>
-        </div>
 
-        <div class="form-row">
-          <label class="form-label" for="{{ form.phone.id_for_label }}">Phone</label>
-          {{ form.phone }}
-        </div>
+          <div class="form-row form-row--split">
+            <div>
+              <label class="form-label" for="id_reg_phone">Phone</label>
+              <input class="form-input" type="tel" id="id_reg_phone" name="phone" maxlength="30" required>
+              <p class="form-errors" data-error-for="phone"></p>
+            </div>
+            <div>
+              <label class="form-label" for="id_reg_email">Email</label>
+              <input class="form-input" type="email" id="id_reg_email" name="email" required>
+              <p class="form-errors" data-error-for="email"></p>
+            </div>
+          </div>
 
-        <div class="form-row">
-          <label class="form-label" for="{{ form.message.id_for_label }}">Message</label>
-          {{ form.message }}
-          {% if form.message.errors %}<p class="form-errors">{{ form.message.errors|striptags }}</p>{% endif %}
-        </div>
+          <div class="form-row">
+            <label class="form-label" for="id_program">Program</label>
+            <select class="form-input" id="id_program" name="program" required>
+              <option value="">Select a program…</option>
+              {% for program in programs %}
+                <option value="{{ program.id }}"{% if program.slug == selected_program_slug %} selected{% endif %}>{{ program.name }}</option>
+              {% endfor %}
+            </select>
+            <p class="form-errors" data-error-for="program"></p>
+          </div>
 
-        <button type="submit" class="btn btn-primary">Send Message</button>
-      </form>
+          <div class="form-row">
+            <label class="form-label" for="id_preferred_schedule">Preferred days/times</label>
+            <input class="form-input" type="text" id="id_preferred_schedule" name="preferred_schedule"
+                   maxlength="200" placeholder="e.g. Saturday afternoons">
+          </div>
+
+          <div class="form-row">
+            <label class="form-label" for="id_reg_message">Message</label>
+            <textarea class="form-input" id="id_reg_message" name="message" rows="4"
+                      placeholder="Anything else we should know? (optional)"></textarea>
+          </div>
+
+          <div class="form-honeypot" aria-hidden="true">
+            <label for="id_reg_website">Website</label>
+            <input type="text" id="id_reg_website" name="website" tabindex="-1" autocomplete="off">
+          </div>
+
+          <button type="submit" class="btn btn-primary">Book a Trial</button>
+        </form>
+      </div>
+
+      <div id="panel-enquiry" class="form-panel" role="tabpanel" aria-labelledby="tab-enquiry" hidden>
+        <form id="contact-form" data-api-url="/api/contact/" novalidate>
+          <div class="form-row form-row--split">
+            <div>
+              <label class="form-label" for="id_name">Name</label>
+              <input class="form-input" type="text" id="id_name" name="name" maxlength="120" required>
+              <p class="form-errors" data-error-for="name"></p>
+            </div>
+            <div>
+              <label class="form-label" for="id_email">Email</label>
+              <input class="form-input" type="email" id="id_email" name="email" required>
+              <p class="form-errors" data-error-for="email"></p>
+            </div>
+          </div>
+
+          <div class="form-row form-row--split">
+            <div>
+              <label class="form-label" for="id_phone">Phone (optional)</label>
+              <input class="form-input" type="tel" id="id_phone" name="phone" maxlength="30">
+              <p class="form-errors" data-error-for="phone"></p>
+            </div>
+            <div>
+              <label class="form-label" for="id_subject">Subject</label>
+              <input class="form-input" type="text" id="id_subject" name="subject" maxlength="150" required>
+              <p class="form-errors" data-error-for="subject"></p>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <label class="form-label" for="id_message">Message</label>
+            <textarea class="form-input" id="id_message" name="message" rows="5" required
+                      placeholder="Tell us about your chess goals…"></textarea>
+            <p class="form-errors" data-error-for="message"></p>
+          </div>
+
+          <div class="form-honeypot" aria-hidden="true">
+            <label for="id_website">Website</label>
+            <input type="text" id="id_website" name="website" tabindex="-1" autocomplete="off">
+          </div>
+
+          <button type="submit" class="btn btn-primary">Send Message</button>
+        </form>
+      </div>
     </div>
   </div>
 </section>
 
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/forms.js' %}" defer></script>
 {% endblock %}

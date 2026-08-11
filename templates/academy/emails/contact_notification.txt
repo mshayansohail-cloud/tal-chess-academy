@@ -1,0 +1,13 @@
+New Contact Enquiry
+
+Name: {{ submission.name }}
+Email: {{ submission.email }}
+Phone: {{ submission.phone|default:"—" }}
+Subject: {{ submission.subject }}
+
+Message:
+{{ submission.message }}
+
+Submitted: {{ submission.submitted_at }}
+
+Log in to the admin panel to update this enquiry's status.

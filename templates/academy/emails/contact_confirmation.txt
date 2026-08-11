@@ -1,0 +1,9 @@
+Hi {{ submission.name }},
+
+Thanks for reaching out to TAL Chess Academy. We've received your message and will reply
+within one business day.
+
+Your message:
+"{{ submission.message }}"
+
+— TAL Chess Academy

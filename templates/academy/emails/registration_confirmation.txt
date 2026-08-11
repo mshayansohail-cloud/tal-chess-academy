@@ -1,0 +1,13 @@
+Hi {{ registration.student_name }},
+
+Thanks for booking a trial with TAL Chess Academy! We've received your request for the
+{{ registration.program.name }} programme, and a member of our team will be in touch within
+one business day to confirm a time.
+
+What you submitted:
+  Program: {{ registration.program.name }}
+  Preferred schedule: {{ registration.preferred_schedule|default:"Not specified" }}
+
+If anything above isn't right, just reply to this email and let us know.
+
+— TAL Chess Academy

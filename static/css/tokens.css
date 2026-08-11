@@ -14,6 +14,7 @@
   --color-gold: #b8935f;
   --color-gold-bright: #cfa876;
   --color-gold-dim: #8a6f4c;
+  --color-error: #c26b5f;
 
   /* Surfaces */
   --surface-primary: var(--color-ink);

@@ -1,0 +1,16 @@
+New Trial Request
+
+Student: {{ registration.student_name }} (age {{ registration.student_age }})
+Parent/Guardian: {{ registration.parent_name|default:"—" }}
+Phone: {{ registration.phone }}
+Email: {{ registration.email }}
+Chess level: {{ registration.get_chess_level_display }}
+Program: {{ registration.program.name }}
+Preferred schedule: {{ registration.preferred_schedule|default:"—" }}
+
+Message:
+{{ registration.message|default:"—" }}
+
+Submitted: {{ registration.submitted_at }}
+
+Log in to the admin panel to update this request's status.

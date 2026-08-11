@@ -13,22 +13,35 @@ https://docs.djangoproject.com/en/6.1/ref/settings/
 import os
 from pathlib import Path
 
+import dj_database_url
+from dotenv import load_dotenv
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
+
+# Loads variables from a local .env file into the environment. This is a
+# no-op if .env doesn't exist, which is the case in production hosts (Render,
+# etc.) where env vars are injected directly by the platform instead.
+load_dotenv(BASE_DIR / '.env')
 
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/6.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-# On Render this is supplied via the SECRET_KEY env var (see render.yaml);
-# the fallback below is only ever used for local development.
+# Always supplied via the SECRET_KEY env var (see .env.example / render.yaml);
+# the fallback below only prevents a hard crash if it's ever missing locally.
 SECRET_KEY = os.getenv(
     'SECRET_KEY', 'django-insecure-z_5t(5#ll+ta+-mg_-(!48jr2ztaml*)-p7or&2-9vbbgfvd!b'
 )
 
-# Render sets the RENDER env var automatically in its build/runtime environment.
-DEBUG = not os.getenv('RENDER')
+# DEBUG is controlled explicitly via the env var when set. Otherwise, fall
+# back to detecting Render's environment (RENDER is set automatically there).
+_debug_env = os.getenv('DEBUG')
+if _debug_env is not None:
+    DEBUG = _debug_env.strip().lower() == 'true'
+else:
+    DEBUG = not os.getenv('RENDER')
 
 ALLOWED_HOSTS = []
 RENDER_EXTERNAL_HOSTNAME = os.getenv('RENDER_EXTERNAL_HOSTNAME')
@@ -36,10 +49,24 @@ if RENDER_EXTERNAL_HOSTNAME:
     ALLOWED_HOSTS.append(RENDER_EXTERNAL_HOSTNAME)
     CSRF_TRUSTED_ORIGINS = [f'https://{RENDER_EXTERNAL_HOSTNAME}']
 if DEBUG:
-    ALLOWED_HOSTS += ['localhost', '127.0.0.1']
+    ALLOWED_HOSTS += ['localhost', '127.0.0.1', '.ngrok-free.dev', '.ngrok-free.app', '.ngrok.io', '.ngrok.app']
+    CSRF_TRUSTED_ORIGINS = [
+        'https://*.ngrok-free.dev', 'https://*.ngrok-free.app', 'https://*.ngrok.io', 'https://*.ngrok.app'
+    ]
 
-# Render terminates TLS at its proxy and forwards plain HTTP, so trust its header.
+# Render (and most PaaS hosts) terminate TLS at their proxy and forward plain
+# HTTP, so trust their header to know when a request was actually HTTPS.
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+
+if not DEBUG:
+    # Safe, reversible hardening — Render always serves over HTTPS, so these
+    # have no downside. HSTS is deliberately left off: browsers cache it for
+    # the duration you set, which makes it awkward to undo if something's
+    # misconfigured. Turn it on once HTTPS is confirmed stable in production:
+    #   SECURE_HSTS_SECONDS = 31536000
+    SECURE_SSL_REDIRECT = True
+    SESSION_COOKIE_SECURE = True
+    CSRF_COOKIE_SECURE = True
 
 
 # Application definition
@@ -51,6 +78,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'rest_framework',
     'academy',
 ]
 
@@ -87,13 +115,19 @@ WSGI_APPLICATION = 'tal_academy.wsgi.application'
 
 # Database
 # https://docs.djangoproject.com/en/6.1/ref/settings/#databases
+# Uses DATABASE_URL when set (e.g. Postgres on Render); otherwise falls back
+# to a local SQLite file, which is fine for development.
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+DATABASE_URL = os.getenv('DATABASE_URL')
+if DATABASE_URL:
+    DATABASES = {'default': dj_database_url.parse(DATABASE_URL, conn_max_age=600)}
+else:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': BASE_DIR / 'db.sqlite3',
+        }
     }
-}
 
 
 # Password validation
@@ -143,12 +177,63 @@ STORAGES = {
     },
 }
 
+DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
 
 # Email
 # https://docs.djangoproject.com/en/6.1/topics/email/#topic-email-configuration
+# Leaving EMAIL_HOST blank (the default) sends email to the console instead
+# of over SMTP — handy for local development without a real mail account.
+# Set EMAIL_HOST (and the other EMAIL_* vars) in .env to send real email.
 
-MAILERS = {
-    'default': {
-        'BACKEND': 'django.core.mail.backends.console.EmailBackend',
+EMAIL_HOST = os.getenv('EMAIL_HOST', '')
+EMAIL_PORT = int(os.getenv('EMAIL_PORT', '587'))
+EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER', '')
+EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD', '')
+EMAIL_USE_TLS = os.getenv('EMAIL_USE_TLS', 'True').strip().lower() == 'true'
+DEFAULT_FROM_EMAIL = os.getenv('DEFAULT_FROM_EMAIL', 'noreply@talchessacademy.example')
+
+# Not a built-in Django setting — our own, read by academy/emails.py to know
+# where to send new-submission notifications.
+ACADEMY_NOTIFICATION_EMAIL = os.getenv('ACADEMY_NOTIFICATION_EMAIL', DEFAULT_FROM_EMAIL)
+
+if EMAIL_HOST:
+    EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+else:
+    EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+
+
+# Django REST Framework
+# https://www.django-rest-framework.org/api-guide/settings/
+# Public write endpoints (registrations, contact) are rate-limited per IP to
+# blunt basic spam/abuse; the read-only programs list gets a more generous cap.
+
+REST_FRAMEWORK = {
+    'DEFAULT_THROTTLE_CLASSES': [
+        'rest_framework.throttling.AnonRateThrottle',
+    ],
+    'DEFAULT_THROTTLE_RATES': {
+        'anon': '60/hour',
+        'registration': '5/hour',
+        'contact': '10/hour',
+    },
+}
+
+
+# Logging
+# Ensures email-send failures (caught in academy/emails.py) are actually
+# visible in the console/server logs instead of silently disappearing.
+
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'handlers': {
+        'console': {
+            'class': 'logging.StreamHandler',
+        },
+    },
+    'root': {
+        'handlers': ['console'],
+        'level': 'INFO',
     },
 }

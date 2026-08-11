@@ -1,53 +1,12 @@
 """
 Static content for the academy site.
 
-The academy has no dynamic/user-generated content yet, so page copy lives
-here as plain Python data rather than in the database. If coach or event
-management ever needs an admin UI, promote these to real models.
+Programs used to live here but are now a real model (academy.models.Program)
+managed through Django admin — see academy/migrations/0002_seed_initial_programs.py
+for the original seed data. The content below has no submission/status workflow
+and no admin-editing need yet, so it stays as plain Python data. If that
+changes, promote it to a model the same way Program was.
 """
-
-PROGRAMS = [
-    {
-        "slug": "junior",
-        "piece": "pawn",
-        "name": "Junior Program",
-        "age": "Ages 6–11",
-        "summary": "A playful, structured introduction to the board — rules, tactics, and the discipline of sitting with a problem until it yields.",
-        "cta": "View curriculum",
-    },
-    {
-        "slug": "beginner",
-        "piece": "knight",
-        "name": "Beginner",
-        "age": "New to competitive play",
-        "summary": "Openings, tactical vision, and the habits that separate players who improve from players who plateau.",
-        "cta": "View curriculum",
-    },
-    {
-        "slug": "intermediate",
-        "piece": "bishop",
-        "name": "Intermediate",
-        "age": "1200–1800 rated",
-        "summary": "Positional understanding, endgame technique, and the calculation depth needed to hold your own in a rated tournament.",
-        "cta": "View curriculum",
-    },
-    {
-        "slug": "advanced",
-        "piece": "rook",
-        "name": "Advanced",
-        "age": "1800+ rated",
-        "summary": "Deep opening preparation, tournament strategy, and game analysis with coaches who have sat across the board from titled players.",
-        "cta": "View curriculum",
-    },
-    {
-        "slug": "private",
-        "piece": "queen",
-        "name": "Private Coaching",
-        "age": "One-to-one",
-        "summary": "A programme built entirely around your games, your openings, and your weaknesses — paced to your rating goals.",
-        "cta": "Enquire now",
-    },
-]
 
 WHY_US = [
     {

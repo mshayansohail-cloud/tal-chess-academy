@@ -4,10 +4,25 @@
   position: sticky;
   top: 0;
   z-index: 100;
-  background: rgba(20, 18, 15, 0.88);
-  backdrop-filter: blur(10px);
   border-bottom: 1px solid transparent;
   transition: border-color var(--duration-base) var(--ease-out);
+}
+
+/*
+  The blur/tint lives on a pseudo-element rather than directly on .navbar.
+  backdrop-filter on an element makes it the containing block for any
+  position:fixed descendant (per spec) — and .nav-links is fixed on mobile.
+  Putting it here on .navbar directly clipped the mobile menu to the
+  navbar's own ~84px box instead of the full viewport.
+*/
+.navbar::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: rgba(20, 18, 15, 0.88);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
 }
 
 .navbar.is-scrolled {
@@ -99,15 +114,22 @@
 .nav-toggle {
   display: none;
   flex-direction: column;
+  align-items: stretch;
   justify-content: center;
   gap: 5px;
   width: 32px;
   height: 32px;
+  padding: 0;
+  flex-shrink: 0;
+  -webkit-appearance: none;
+  appearance: none;
 }
 
 .nav-toggle span {
   display: block;
-  height: 1px;
+  width: 100%;
+  height: 2px;
+  flex-shrink: 0;
   background: var(--text-primary);
   transition: transform var(--duration-fast) var(--ease-out), opacity var(--duration-fast) var(--ease-out);
 }
@@ -956,7 +978,30 @@
 .form-errors {
   margin-top: var(--space-2);
   font-size: var(--fs-xs);
-  color: var(--color-gold-bright);
+  color: var(--color-error);
+  min-height: 0;
+}
+
+.form-errors:empty {
+  display: none;
+}
+
+.form-input.has-error {
+  border-color: var(--color-error);
+}
+
+select.form-input {
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23b6ae9e' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 1rem center;
+  background-size: 16px;
+  padding-right: 2.75rem;
+}
+
+select.form-input option {
+  background: var(--color-ink-soft);
+  color: var(--text-primary);
 }
 
 .form-success {
@@ -965,6 +1010,67 @@
   color: var(--color-gold-bright);
   font-size: var(--fs-sm);
   margin-bottom: var(--space-6);
+}
+
+.form-feedback {
+  padding: var(--space-4) var(--space-5);
+  border: 1px solid var(--color-gold-dim);
+  color: var(--color-gold-bright);
+  font-size: var(--fs-sm);
+  margin-bottom: var(--space-6);
+}
+
+.form-feedback[hidden] {
+  display: none;
+}
+
+.form-feedback--error {
+  border-color: var(--color-error);
+  color: var(--color-error);
+}
+
+.form-tabs {
+  display: flex;
+  gap: var(--space-6);
+  border-bottom: 1px solid var(--border-hairline);
+  margin-bottom: var(--space-6);
+}
+
+.form-tab {
+  padding-bottom: var(--space-3);
+  font-size: var(--fs-xs);
+  letter-spacing: var(--tracking-wide);
+  text-transform: uppercase;
+  color: var(--text-muted);
+  border-bottom: 2px solid transparent;
+  margin-bottom: -1px;
+  transition: color var(--duration-fast) var(--ease-out), border-color var(--duration-fast) var(--ease-out);
+}
+
+.form-tab:hover {
+  color: var(--text-primary);
+}
+
+.form-tab.is-active {
+  color: var(--color-gold);
+  border-bottom-color: var(--color-gold);
+}
+
+.form-panel[hidden] {
+  display: none;
+}
+
+.form-honeypot {
+  position: absolute;
+  left: -9999px;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+}
+
+.btn[disabled] {
+  opacity: 0.6;
+  cursor: not-allowed;
 }
 
 @media (max-width: 800px) {

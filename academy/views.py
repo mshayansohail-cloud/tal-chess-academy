@@ -1,14 +1,13 @@
-from django.contrib import messages
 from django.http import Http404
-from django.shortcuts import redirect, render
+from django.shortcuts import render
 
 from . import data
-from .forms import ContactForm
+from .models import Program
 
 
 def home(request):
     context = {
-        "programs": data.PROGRAMS,
+        "programs": Program.objects.filter(is_active=True),
         "why_us": data.WHY_US,
         "coaches": data.COACHES,
         "stats": data.STATS,
@@ -23,7 +22,7 @@ def about(request):
 
 
 def programs(request):
-    return render(request, "academy/programs.html", {"programs": data.PROGRAMS})
+    return render(request, "academy/programs.html", {"programs": Program.objects.filter(is_active=True)})
 
 
 def coaches(request):
@@ -46,14 +45,13 @@ def events(request):
 
 
 def contact(request):
-    if request.method == "POST":
-        form = ContactForm(request.POST)
-        if form.is_valid():
-            messages.success(
-                request,
-                "Thank you — your message has been received. A member of our team will be in touch shortly.",
-            )
-            return redirect("contact")
-    else:
-        form = ContactForm()
-    return render(request, "academy/contact.html", {"form": form})
+    """
+    Renders the Book a Trial / Contact page shell. Both forms on this page
+    submit via JS to the /api/registrations/ and /api/contact/ endpoints
+    (see static/js/forms.js) rather than posting back to this view.
+    """
+    context = {
+        "programs": Program.objects.filter(is_active=True),
+        "selected_program_slug": request.GET.get("program", ""),
+    }
+    return render(request, "academy/contact.html", context)
