@@ -321,6 +321,13 @@
 }
 
 .about-split__body {
+  color: var(--text-muted);
+}
+
+/* Used both on the default dark surface (about.html's own intro) and inside
+   .surface-inverse (home.html's About section) — --text-muted above is the
+   dark-surface default; only override for the ivory surface-inverse context. */
+.surface-inverse .about-split__body {
   color: var(--text-inverse-muted);
 }
 
