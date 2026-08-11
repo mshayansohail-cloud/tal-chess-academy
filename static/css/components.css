@@ -426,6 +426,17 @@
   color: var(--text-muted);
 }
 
+/* --color-gold/--text-muted are calibrated for the dark surface; on the
+   ivory .surface-inverse background (see about.html) they drop to ~2.5:1
+   and ~2:1 — both well under WCAG AA's 4.5:1 minimum for this text size. */
+.surface-inverse .why-item__index {
+  color: var(--color-gold-contrast);
+}
+
+.surface-inverse .why-item__desc {
+  color: var(--text-inverse-muted);
+}
+
 @media (max-width: 1000px) {
   .why-grid {
     grid-template-columns: repeat(2, 1fr);

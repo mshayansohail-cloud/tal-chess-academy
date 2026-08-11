@@ -157,6 +157,10 @@ textarea {
   color: var(--color-gold-contrast);
 }
 
+.surface-inverse .btn-text {
+  color: var(--color-gold-contrast);
+}
+
 .eyebrow {
   font-size: var(--fs-2xs);
   letter-spacing: var(--tracking-wider);
