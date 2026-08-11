@@ -1,4 +1,5 @@
 from rest_framework import generics, permissions, status
+from rest_framework.parsers import JSONParser
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
@@ -26,7 +27,14 @@ class RegistrationCreateAPIView(APIView):
     """
 
     permission_classes = [permissions.AllowAny]
+    # No SessionAuthentication here, deliberately: this view is AllowAny and
+    # never needs to know who's logged in, but SessionAuthentication enforces
+    # CSRF whenever it resolves a valid session — which would 403 a visitor
+    # who happens to be logged into /staff-portal/ in the same browser (e.g.
+    # staff testing their own site), since forms.js never sends a CSRF token.
+    authentication_classes = []
     throttle_classes = [RegistrationRateThrottle]
+    parser_classes = [JSONParser]
 
     def post(self, request):
         serializer = TrialRegistrationSerializer(data=request.data)
@@ -56,7 +64,10 @@ class ContactCreateAPIView(APIView):
     """
 
     permission_classes = [permissions.AllowAny]
+    # See RegistrationCreateAPIView above for why authentication is disabled here.
+    authentication_classes = []
     throttle_classes = [ContactRateThrottle]
+    parser_classes = [JSONParser]
 
     def post(self, request):
         serializer = ContactSubmissionSerializer(data=request.data)

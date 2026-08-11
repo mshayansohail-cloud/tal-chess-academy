@@ -1,4 +1,5 @@
-from django.http import Http404
+from django.conf import settings
+from django.http import Http404, HttpResponse
 from django.shortcuts import render
 
 from . import data
@@ -50,8 +51,30 @@ def contact(request):
     submit via JS to the /api/registrations/ and /api/contact/ endpoints
     (see static/js/forms.js) rather than posting back to this view.
     """
+    programs = Program.objects.filter(is_active=True)
+    selected_program_slug = request.GET.get("program", "")
+    selected_program = None
+    if selected_program_slug:
+        for program in programs:
+            if program.slug == selected_program_slug:
+                selected_program = program
+                break
     context = {
-        "programs": Program.objects.filter(is_active=True),
-        "selected_program_slug": request.GET.get("program", ""),
+        "programs": programs,
+        "selected_program_slug": selected_program_slug,
+        "selected_program": selected_program,
     }
     return render(request, "academy/contact.html", context)
+
+
+def robots_txt(request):
+    sitemap_url = request.build_absolute_uri('/sitemap.xml')
+    lines = [
+        'User-agent: *',
+        'Allow: /',
+        f'Disallow: {settings.ADMIN_URL if settings.ADMIN_URL.startswith("/") else "/" + settings.ADMIN_URL}',
+        'Disallow: /api/',
+        '',
+        f'Sitemap: {sitemap_url}',
+    ]
+    return HttpResponse('\n'.join(lines), content_type='text/plain')

@@ -14,6 +14,10 @@
   --color-gold: #b8935f;
   --color-gold-bright: #cfa876;
   --color-gold-dim: #8a6f4c;
+  /* A darker gold for text on light (surface-inverse) backgrounds — the
+     regular --color-gold only reaches ~2.5:1 against ivory, well under the
+     4.5:1 WCAG AA minimum for normal text. This hits ~5.3:1. */
+  --color-gold-contrast: #7a5f3f;
   --color-error: #c26b5f;
 
   /* Surfaces */

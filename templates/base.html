@@ -6,6 +6,21 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>{% block title %}TAL Chess Academy — Discipline. Depth. Distinction.{% endblock %}</title>
   <meta name="description" content="{% block meta_description %}TAL Chess Academy trains players from first moves to tournament mastery, led by FIDE-titled coaches in a structured, competitive environment.{% endblock %}">
+  <link rel="canonical" href="{{ request.scheme }}://{{ request.get_host }}{{ request.path }}">
+
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="TAL Chess Academy">
+  <meta property="og:url" content="{{ request.scheme }}://{{ request.get_host }}{{ request.path }}">
+  <meta property="og:title" content="{% block og_title %}TAL Chess Academy — Discipline. Depth. Distinction.{% endblock %}">
+  <meta property="og:description" content="{% block og_description %}TAL Chess Academy trains players from first moves to tournament mastery, led by FIDE-titled coaches in a structured, competitive environment.{% endblock %}">
+  {% comment %}
+    Twitter/X falls back to the og:title/og:description above automatically
+    for summary cards when twitter:title/description aren't set — no need
+    to duplicate them.
+  {% endcomment %}
+  <meta name="twitter:card" content="summary">
+
+  <link rel="icon" type="image/svg+xml" href="{% static 'favicon.svg' %}">
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -18,6 +33,7 @@
   {% block extra_css %}{% endblock %}
 </head>
 <body class="page-enter">
+  <a href="#main" class="skip-link">Skip to content</a>
   {% include "partials/icon_sprite.html" %}
   {% include "partials/navbar.html" %}
 

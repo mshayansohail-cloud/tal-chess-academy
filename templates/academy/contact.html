@@ -1,18 +1,29 @@
 {% extends "base.html" %}
 {% load static %}
 
-{% block title %}Contact — TAL Chess Academy{% endblock %}
-{% block meta_description %}Book a trial lesson or get in touch with TAL Chess Academy.{% endblock %}
+{% block title %}Book a Trial Lesson — TAL Chess Academy{% endblock %}
+{% block meta_description %}Book a trial lesson or get in touch with TAL Chess Academy — we typically reply within one business day.{% endblock %}
+{% block og_title %}Book a Trial Lesson — TAL Chess Academy{% endblock %}
+{% block og_description %}Book a trial lesson or get in touch with TAL Chess Academy — we typically reply within one business day.{% endblock %}
 
 {% block content %}
 
 <header class="page-header">
   <div class="container">
     <p class="breadcrumb"><a href="{% url 'home' %}">Home</a> / Contact</p>
-    <h1 class="page-header__title">Ready to improve your game?</h1>
-    <p class="page-header__desc">
-      Book a trial lesson or send us a general enquiry — we typically reply within one business day.
-    </p>
+    {% if selected_program %}
+      <p class="eyebrow">Enquiring about {{ selected_program.name }}</p>
+      <h1 class="page-header__title">Book a Trial — {{ selected_program.name }}</h1>
+      <p class="page-header__desc">
+        {{ selected_program.age_group }}. We've pre-filled the programme below — just add your details
+        and we'll be in touch within one business day.
+      </p>
+    {% else %}
+      <h1 class="page-header__title">Ready to improve your game?</h1>
+      <p class="page-header__desc">
+        Book a trial lesson or send us a general enquiry — we typically reply within one business day.
+      </p>
+    {% endif %}
   </div>
 </header>
 
@@ -22,11 +33,11 @@
       <p class="section-label">Get in touch</p>
       <div class="contact-info__item">
         <p class="contact-info__label">Email</p>
-        <p class="contact-info__value"><a href="mailto:info@talchessacademy.example">info@talchessacademy.example</a></p>
+        <p class="contact-info__value"><a href="mailto:contact@yourdomain.com">contact@yourdomain.com</a></p>
       </div>
       <div class="contact-info__item">
         <p class="contact-info__label">Phone</p>
-        <p class="contact-info__value"><a href="tel:+10000000000">+1 (000) 000-0000</a></p>
+        <p class="contact-info__value"><a href="tel:+15550000000">+1 (555) 000-0000</a></p>
       </div>
       <div class="contact-info__item">
         <p class="contact-info__label">Location</p>
@@ -53,72 +64,78 @@
       <div id="form-feedback" class="form-feedback" role="status" aria-live="polite" hidden></div>
 
       <div id="panel-trial" class="form-panel" role="tabpanel" aria-labelledby="tab-trial">
+        <p class="form-legend"><span aria-hidden="true">*</span> Required field</p>
         <form id="trial-form" data-api-url="/api/registrations/" novalidate>
           <div class="form-row form-row--split">
             <div>
-              <label class="form-label" for="id_student_name">Student name</label>
-              <input class="form-input" type="text" id="id_student_name" name="student_name" maxlength="120" required>
-              <p class="form-errors" data-error-for="student_name"></p>
+              <label class="form-label" for="id_student_name">Student name <span class="required-marker" aria-hidden="true">*</span></label>
+              <input class="form-input" type="text" id="id_student_name" name="student_name" maxlength="120"
+                     autocomplete="name" aria-describedby="id_student_name_error" required>
+              <p class="form-errors" id="id_student_name_error" data-error-for="student_name"></p>
             </div>
             <div>
               <label class="form-label" for="id_parent_name">Parent/Guardian name</label>
               <input class="form-input" type="text" id="id_parent_name" name="parent_name" maxlength="120"
+                     autocomplete="off" aria-describedby="id_parent_name_error"
                      placeholder="Leave blank for adult students">
-              <p class="form-errors" data-error-for="parent_name"></p>
+              <p class="form-errors" id="id_parent_name_error" data-error-for="parent_name"></p>
             </div>
           </div>
 
           <div class="form-row form-row--split">
             <div>
-              <label class="form-label" for="id_student_age">Student age</label>
-              <input class="form-input" type="number" id="id_student_age" name="student_age" min="3" max="100" required>
-              <p class="form-errors" data-error-for="student_age"></p>
+              <label class="form-label" for="id_student_age">Student age <span class="required-marker" aria-hidden="true">*</span></label>
+              <input class="form-input" type="number" id="id_student_age" name="student_age" min="3" max="100"
+                     aria-describedby="id_student_age_error" required>
+              <p class="form-errors" id="id_student_age_error" data-error-for="student_age"></p>
             </div>
             <div>
-              <label class="form-label" for="id_chess_level">Chess experience</label>
-              <select class="form-input" id="id_chess_level" name="chess_level" required>
+              <label class="form-label" for="id_chess_level">Chess experience <span class="required-marker" aria-hidden="true">*</span></label>
+              <select class="form-input" id="id_chess_level" name="chess_level" aria-describedby="id_chess_level_error" required>
                 <option value="none">Never played</option>
                 <option value="beginner">Beginner</option>
                 <option value="intermediate">Intermediate</option>
                 <option value="advanced">Advanced</option>
               </select>
-              <p class="form-errors" data-error-for="chess_level"></p>
+              <p class="form-errors" id="id_chess_level_error" data-error-for="chess_level"></p>
             </div>
           </div>
 
           <div class="form-row form-row--split">
             <div>
-              <label class="form-label" for="id_reg_phone">Phone</label>
-              <input class="form-input" type="tel" id="id_reg_phone" name="phone" maxlength="30" required>
-              <p class="form-errors" data-error-for="phone"></p>
+              <label class="form-label" for="id_reg_phone">Phone <span class="required-marker" aria-hidden="true">*</span></label>
+              <input class="form-input" type="tel" id="id_reg_phone" name="phone" maxlength="30"
+                     autocomplete="tel" aria-describedby="id_reg_phone_error" required>
+              <p class="form-errors" id="id_reg_phone_error" data-error-for="phone"></p>
             </div>
             <div>
-              <label class="form-label" for="id_reg_email">Email</label>
-              <input class="form-input" type="email" id="id_reg_email" name="email" required>
-              <p class="form-errors" data-error-for="email"></p>
+              <label class="form-label" for="id_reg_email">Email <span class="required-marker" aria-hidden="true">*</span></label>
+              <input class="form-input" type="email" id="id_reg_email" name="email"
+                     autocomplete="email" aria-describedby="id_reg_email_error" required>
+              <p class="form-errors" id="id_reg_email_error" data-error-for="email"></p>
             </div>
           </div>
 
           <div class="form-row">
-            <label class="form-label" for="id_program">Program</label>
-            <select class="form-input" id="id_program" name="program" required>
+            <label class="form-label" for="id_program">Program <span class="required-marker" aria-hidden="true">*</span></label>
+            <select class="form-input" id="id_program" name="program" aria-describedby="id_program_error" required>
               <option value="">Select a program…</option>
               {% for program in programs %}
                 <option value="{{ program.id }}"{% if program.slug == selected_program_slug %} selected{% endif %}>{{ program.name }}</option>
               {% endfor %}
             </select>
-            <p class="form-errors" data-error-for="program"></p>
+            <p class="form-errors" id="id_program_error" data-error-for="program"></p>
           </div>
 
           <div class="form-row">
             <label class="form-label" for="id_preferred_schedule">Preferred days/times</label>
             <input class="form-input" type="text" id="id_preferred_schedule" name="preferred_schedule"
-                   maxlength="200" placeholder="e.g. Saturday afternoons">
+                   maxlength="200" autocomplete="off" placeholder="e.g. Saturday afternoons">
           </div>
 
           <div class="form-row">
             <label class="form-label" for="id_reg_message">Message</label>
-            <textarea class="form-input" id="id_reg_message" name="message" rows="4"
+            <textarea class="form-input" id="id_reg_message" name="message" rows="4" autocomplete="off"
                       placeholder="Anything else we should know? (optional)"></textarea>
           </div>
 
@@ -132,38 +149,44 @@
       </div>
 
       <div id="panel-enquiry" class="form-panel" role="tabpanel" aria-labelledby="tab-enquiry" hidden>
+        <p class="form-legend"><span aria-hidden="true">*</span> Required field</p>
         <form id="contact-form" data-api-url="/api/contact/" novalidate>
           <div class="form-row form-row--split">
             <div>
-              <label class="form-label" for="id_name">Name</label>
-              <input class="form-input" type="text" id="id_name" name="name" maxlength="120" required>
-              <p class="form-errors" data-error-for="name"></p>
+              <label class="form-label" for="id_name">Name <span class="required-marker" aria-hidden="true">*</span></label>
+              <input class="form-input" type="text" id="id_name" name="name" maxlength="120"
+                     autocomplete="name" aria-describedby="id_name_error" required>
+              <p class="form-errors" id="id_name_error" data-error-for="name"></p>
             </div>
             <div>
-              <label class="form-label" for="id_email">Email</label>
-              <input class="form-input" type="email" id="id_email" name="email" required>
-              <p class="form-errors" data-error-for="email"></p>
+              <label class="form-label" for="id_email">Email <span class="required-marker" aria-hidden="true">*</span></label>
+              <input class="form-input" type="email" id="id_email" name="email"
+                     autocomplete="email" aria-describedby="id_email_error" required>
+              <p class="form-errors" id="id_email_error" data-error-for="email"></p>
             </div>
           </div>
 
           <div class="form-row form-row--split">
             <div>
               <label class="form-label" for="id_phone">Phone (optional)</label>
-              <input class="form-input" type="tel" id="id_phone" name="phone" maxlength="30">
-              <p class="form-errors" data-error-for="phone"></p>
+              <input class="form-input" type="tel" id="id_phone" name="phone" maxlength="30"
+                     autocomplete="tel" aria-describedby="id_phone_error">
+              <p class="form-errors" id="id_phone_error" data-error-for="phone"></p>
             </div>
             <div>
-              <label class="form-label" for="id_subject">Subject</label>
-              <input class="form-input" type="text" id="id_subject" name="subject" maxlength="150" required>
-              <p class="form-errors" data-error-for="subject"></p>
+              <label class="form-label" for="id_subject">Subject <span class="required-marker" aria-hidden="true">*</span></label>
+              <input class="form-input" type="text" id="id_subject" name="subject" maxlength="150"
+                     autocomplete="off" aria-describedby="id_subject_error" required>
+              <p class="form-errors" id="id_subject_error" data-error-for="subject"></p>
             </div>
           </div>
 
           <div class="form-row">
-            <label class="form-label" for="id_message">Message</label>
-            <textarea class="form-input" id="id_message" name="message" rows="5" required
+            <label class="form-label" for="id_message">Message <span class="required-marker" aria-hidden="true">*</span></label>
+            <textarea class="form-input" id="id_message" name="message" rows="5" autocomplete="off"
+                      aria-describedby="id_message_error" required
                       placeholder="Tell us about your chess goals…"></textarea>
-            <p class="form-errors" data-error-for="message"></p>
+            <p class="form-errors" id="id_message_error" data-error-for="message"></p>
           </div>
 
           <div class="form-honeypot" aria-hidden="true">

@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+
+{% block title %}Page Not Found — TAL Chess Academy{% endblock %}
+{% block meta_description %}The page you're looking for doesn't exist.{% endblock %}
+
+{% block content %}
+
+<header class="page-header">
+  <div class="container">
+    <p class="breadcrumb"><a href="{% url 'home' %}">Home</a> / Not Found</p>
+    <h1 class="page-header__title">This page doesn't exist.</h1>
+    <p class="page-header__desc">
+      The page you're looking for may have moved or the link may be out of date.
+      Here are a few places to pick up from instead.
+    </p>
+  </div>
+</header>
+
+<section class="section final-cta">
+  <div class="container">
+    <div class="final-cta__actions">
+      <a href="{% url 'home' %}" class="btn btn-primary">Back to Home</a>
+      <a href="{% url 'contact' %}" class="btn btn-ghost">Contact Us</a>
+    </div>
+  </div>
+</section>
+
+{% endblock %}

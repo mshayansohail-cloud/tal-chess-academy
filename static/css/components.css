@@ -111,6 +111,13 @@
   gap: var(--space-5);
 }
 
+/* This "Book a Trial" only belongs in the mobile dropdown (re-shown in the
+   @media block below) — the desktop CTA lives in .navbar__actions instead.
+   Without this, both rendered at once on desktop. */
+.nav-links .btn-primary {
+  display: none;
+}
+
 .nav-toggle {
   display: none;
   flex-direction: column;
@@ -337,7 +344,8 @@
   gap: var(--space-6);
   padding-block: var(--space-6);
   border-top: 1px solid var(--border-hairline);
-  transition: padding-inline var(--duration-base) var(--ease-out);
+  transition: padding-inline var(--duration-base) var(--ease-out),
+    background-color var(--duration-base) var(--ease-out);
 }
 
 .program-list > :last-child {
@@ -755,32 +763,6 @@
   color: var(--text-primary);
 }
 
-.footer__social {
-  display: flex;
-  gap: var(--space-3);
-  margin-top: var(--space-5);
-}
-
-.footer__social a {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 36px;
-  height: 36px;
-  border: 1px solid var(--border-hairline);
-  transition: border-color var(--duration-fast) var(--ease-out), color var(--duration-fast) var(--ease-out);
-}
-
-.footer__social a:hover {
-  border-color: var(--color-gold);
-  color: var(--color-gold);
-}
-
-.footer__social svg {
-  width: 15px;
-  height: 15px;
-}
-
 .footer__bottom {
   margin-top: var(--space-8);
   padding-top: var(--space-5);
@@ -906,7 +888,9 @@
 .milestone__year {
   font-family: var(--font-display);
   font-size: var(--fs-lg);
-  color: var(--color-gold-dim);
+  /* At 20px this doesn't qualify for WCAG's large-text 3:1 exemption, so it
+     needs the full 4.5:1 — --color-gold-dim only reaches ~4:1 here. */
+  color: var(--color-gold-contrast);
 }
 
 .milestone__desc {
@@ -954,6 +938,20 @@
   text-transform: uppercase;
   color: var(--text-muted);
   margin-bottom: var(--space-2);
+}
+
+.required-marker {
+  color: var(--color-gold);
+}
+
+.form-legend {
+  font-size: var(--fs-xs);
+  color: var(--text-muted);
+  margin-bottom: var(--space-5);
+}
+
+.form-legend span {
+  color: var(--color-gold);
 }
 
 .form-input {

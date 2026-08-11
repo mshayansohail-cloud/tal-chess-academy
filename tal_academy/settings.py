@@ -14,6 +14,7 @@ import os
 from pathlib import Path
 
 import dj_database_url
+from django.core.exceptions import ImproperlyConfigured
 from dotenv import load_dotenv
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -28,29 +29,38 @@ load_dotenv(BASE_DIR / '.env')
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/6.1/howto/deployment/checklist/
 
-# SECURITY WARNING: keep the secret key used in production secret!
-# Always supplied via the SECRET_KEY env var (see .env.example / render.yaml);
-# the fallback below only prevents a hard crash if it's ever missing locally.
-SECRET_KEY = os.getenv(
-    'SECRET_KEY', 'django-insecure-z_5t(5#ll+ta+-mg_-(!48jr2ztaml*)-p7or&2-9vbbgfvd!b'
-)
+# DEBUG defaults to False — a missing/misconfigured env var should fail safe
+# (closed) rather than fail open into exposing stack traces and settings.
+# Set DEBUG=True explicitly in .env for local development.
+DEBUG = os.getenv('DEBUG', 'False').strip().lower() == 'true'
 
-# DEBUG is controlled explicitly via the env var when set. Otherwise, fall
-# back to detecting Render's environment (RENDER is set automatically there).
-_debug_env = os.getenv('DEBUG')
-if _debug_env is not None:
-    DEBUG = _debug_env.strip().lower() == 'true'
-else:
-    DEBUG = not os.getenv('RENDER')
+# SECURITY WARNING: keep the secret key used in production secret!
+# Always supplied via the SECRET_KEY env var (see .env.example / render.yaml).
+# In production (DEBUG=False) we refuse to start rather than silently fall
+# back to an insecure, publicly-committed default key.
+SECRET_KEY = os.getenv('SECRET_KEY')
+if not SECRET_KEY:
+    if DEBUG:
+        SECRET_KEY = 'django-insecure-z_5t(5#ll+ta+-mg_-(!48jr2ztaml*)-p7or&2-9vbbgfvd!b'
+    else:
+        raise ImproperlyConfigured(
+            'SECRET_KEY environment variable must be set when DEBUG is False. '
+            'Refusing to start with an insecure default key in production.'
+        )
 
 ALLOWED_HOSTS = []
+_extra_hosts = os.getenv('ALLOWED_HOSTS', '')
+if _extra_hosts:
+    ALLOWED_HOSTS += [host.strip() for host in _extra_hosts.split(',') if host.strip()]
+
 RENDER_EXTERNAL_HOSTNAME = os.getenv('RENDER_EXTERNAL_HOSTNAME')
+CSRF_TRUSTED_ORIGINS = []
 if RENDER_EXTERNAL_HOSTNAME:
     ALLOWED_HOSTS.append(RENDER_EXTERNAL_HOSTNAME)
-    CSRF_TRUSTED_ORIGINS = [f'https://{RENDER_EXTERNAL_HOSTNAME}']
+    CSRF_TRUSTED_ORIGINS.append(f'https://{RENDER_EXTERNAL_HOSTNAME}')
 if DEBUG:
     ALLOWED_HOSTS += ['localhost', '127.0.0.1', '.ngrok-free.dev', '.ngrok-free.app', '.ngrok.io', '.ngrok.app']
-    CSRF_TRUSTED_ORIGINS = [
+    CSRF_TRUSTED_ORIGINS += [
         'https://*.ngrok-free.dev', 'https://*.ngrok-free.app', 'https://*.ngrok.io', 'https://*.ngrok.app'
     ]
 
@@ -68,6 +78,11 @@ if not DEBUG:
     SESSION_COOKIE_SECURE = True
     CSRF_COOKIE_SECURE = True
 
+# The admin path, kept out of the well-known "/admin/" default as one cheap
+# layer of defense-in-depth against automated scanners. Change it via env
+# var if you want a different one — used in tal_academy/urls.py.
+ADMIN_URL = os.getenv('ADMIN_URL', 'staff-portal/')
+
 
 # Application definition
 
@@ -78,7 +93,9 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'django.contrib.sitemaps',
     'rest_framework',
+    'axes',
     'academy',
 ]
 
@@ -91,6 +108,14 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'axes.middleware.AxesMiddleware',
+    'academy.middleware.NoIndexAdminApiMiddleware',
+]
+
+# django-axes needs its own backend checked first to enforce lockouts.
+AUTHENTICATION_BACKENDS = [
+    'axes.backends.AxesStandaloneBackend',
+    'django.contrib.auth.backends.ModelBackend',
 ]
 
 ROOT_URLCONF = 'tal_academy.urls'
@@ -120,7 +145,10 @@ WSGI_APPLICATION = 'tal_academy.wsgi.application'
 
 DATABASE_URL = os.getenv('DATABASE_URL')
 if DATABASE_URL:
-    DATABASES = {'default': dj_database_url.parse(DATABASE_URL, conn_max_age=600)}
+    # conn_health_checks: managed Postgres (e.g. Render's) periodically drops
+    # idle connections; without this, Django can hand out a dead connection
+    # from its pool and error on the next request that uses it.
+    DATABASES = {'default': dj_database_url.parse(DATABASE_URL, conn_max_age=600, conn_health_checks=True)}
 else:
     DATABASES = {
         'default': {
@@ -193,6 +221,12 @@ EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD', '')
 EMAIL_USE_TLS = os.getenv('EMAIL_USE_TLS', 'True').strip().lower() == 'true'
 DEFAULT_FROM_EMAIL = os.getenv('DEFAULT_FROM_EMAIL', 'noreply@talchessacademy.example')
 
+# Emails are sent synchronously inside the request (see academy/emails.py).
+# Without a timeout, a slow/unreachable SMTP server hangs that request until
+# gunicorn's own worker timeout kills it — a bad connection should fail fast
+# instead of stalling the response to whoever just submitted a form.
+EMAIL_TIMEOUT = 10
+
 # Not a built-in Django setting — our own, read by academy/emails.py to know
 # where to send new-submission notifications.
 ACADEMY_NOTIFICATION_EMAIL = os.getenv('ACADEMY_NOTIFICATION_EMAIL', DEFAULT_FROM_EMAIL)
@@ -202,6 +236,15 @@ if EMAIL_HOST:
 else:
     EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 
+# Django emails these addresses automatically whenever an unhandled 500
+# happens in production (via the mail_admins log handler wired up by
+# Django's own default logging config) — otherwise a real crash for a real
+# visitor would go completely unnoticed unless someone happened to check
+# the server logs.
+if ACADEMY_NOTIFICATION_EMAIL:
+    ADMINS = [('Site Admin', ACADEMY_NOTIFICATION_EMAIL)]
+SERVER_EMAIL = DEFAULT_FROM_EMAIL
+
 
 # Django REST Framework
 # https://www.django-rest-framework.org/api-guide/settings/
@@ -209,6 +252,11 @@ else:
 # blunt basic spam/abuse; the read-only programs list gets a more generous cap.
 
 REST_FRAMEWORK = {
+    # Both Render and the ngrok dev tunnel sit exactly one proxy hop in front
+    # of the app. Without this, DRF trusts the client-supplied X-Forwarded-For
+    # header verbatim, which lets a client spoof a different "identity" on
+    # every request and bypass the throttles below entirely.
+    'NUM_PROXIES': 1,
     'DEFAULT_THROTTLE_CLASSES': [
         'rest_framework.throttling.AnonRateThrottle',
     ],
@@ -217,7 +265,39 @@ REST_FRAMEWORK = {
         'registration': '5/hour',
         'contact': '10/hour',
     },
+    # Secure by default: any future view that forgets to set permission_classes
+    # is private, not public. The three current public endpoints opt in to
+    # AllowAny explicitly (see academy/api_views.py).
+    'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework.permissions.IsAuthenticated',
+    ],
+    # Drop BasicAuthentication (DRF's default) — nothing here uses it, and it
+    # sends credentials on every request rather than a scoped token/session.
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework.authentication.SessionAuthentication',
+    ],
+    # The interactive Browsable API is handy for local testing (see README)
+    # but reveals framework internals to anyone who browses to an API URL
+    # directly — restrict production to plain JSON only.
+    'DEFAULT_RENDERER_CLASSES': (
+        ['rest_framework.renderers.JSONRenderer']
+        if not DEBUG
+        else ['rest_framework.renderers.JSONRenderer', 'rest_framework.renderers.BrowsableAPIRenderer']
+    ),
 }
+
+
+# django-axes: locks out repeated failed login attempts against /staff-portal/
+# (and anywhere else using Django's auth backends). Without this, admin login
+# has no brute-force protection at all — Django ships none by default.
+# https://django-axes.readthedocs.io/
+
+AXES_FAILURE_LIMIT = 5
+AXES_COOLOFF_TIME = 1  # hours
+AXES_LOCKOUT_PARAMETERS = [['username', 'ip_address']]
+AXES_RESET_ON_SUCCESS = True
+# Matches REST_FRAMEWORK['NUM_PROXIES'] above — same single-proxy topology.
+AXES_IPWARE_PROXY_COUNT = 1
 
 
 # Logging
@@ -227,9 +307,16 @@ REST_FRAMEWORK = {
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
+    'formatters': {
+        'simple': {
+            'format': '{asctime} {levelname} {name}: {message}',
+            'style': '{',
+        },
+    },
     'handlers': {
         'console': {
             'class': 'logging.StreamHandler',
+            'formatter': 'simple',
         },
     },
     'root': {

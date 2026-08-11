@@ -5,20 +5,38 @@
   var tabs = document.querySelectorAll("[data-tab-target]");
   var feedback = document.getElementById("form-feedback");
 
-  tabs.forEach(function (tab) {
+  function activateTab(tab) {
+    tabs.forEach(function (other) {
+      other.classList.remove("is-active");
+      other.setAttribute("aria-selected", "false");
+    });
+    tab.classList.add("is-active");
+    tab.setAttribute("aria-selected", "true");
+
+    document.querySelectorAll(".form-panel").forEach(function (panel) {
+      panel.hidden = panel.id !== tab.getAttribute("data-tab-target");
+    });
+
+    hideFeedback();
+  }
+
+  tabs.forEach(function (tab, index) {
     tab.addEventListener("click", function () {
-      tabs.forEach(function (other) {
-        other.classList.remove("is-active");
-        other.setAttribute("aria-selected", "false");
-      });
-      tab.classList.add("is-active");
-      tab.setAttribute("aria-selected", "true");
+      activateTab(tab);
+    });
 
-      document.querySelectorAll(".form-panel").forEach(function (panel) {
-        panel.hidden = panel.id !== tab.getAttribute("data-tab-target");
-      });
-
-      hideFeedback();
+    // Standard ARIA tabs keyboard pattern: Left/Right moves focus and
+    // switches tabs. role="tab" implies this interaction to screen reader
+    // users, so it needs to actually work, not just be clickable.
+    tab.addEventListener("keydown", function (event) {
+      if (event.key !== "ArrowLeft" && event.key !== "ArrowRight") return;
+      event.preventDefault();
+      var nextIndex = event.key === "ArrowRight"
+        ? (index + 1) % tabs.length
+        : (index - 1 + tabs.length) % tabs.length;
+      var nextTab = tabs[nextIndex];
+      nextTab.focus();
+      activateTab(nextTab);
     });
   });
 
@@ -42,6 +60,7 @@
     });
     form.querySelectorAll(".form-input.has-error").forEach(function (el) {
       el.classList.remove("has-error");
+      el.removeAttribute("aria-invalid");
     });
   }
 
@@ -62,6 +81,10 @@
 
       if (inputEl) {
         inputEl.classList.add("has-error");
+        // aria-describedby is already wired to this field's error element in
+        // the HTML, so it's announced automatically — this just tells
+        // assistive tech the field itself is currently invalid.
+        inputEl.setAttribute("aria-invalid", "true");
         if (!firstInvalid) firstInvalid = inputEl;
       }
     });

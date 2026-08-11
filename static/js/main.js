@@ -6,17 +6,37 @@
   /* Mobile nav toggle */
   var navToggle = document.querySelector(".nav-toggle");
   var navLinks = document.querySelector(".nav-links");
+  var mobileNavQuery = window.matchMedia("(max-width: 900px)");
 
   if (navToggle && navLinks) {
+    // On mobile, the closed menu is hidden via opacity/pointer-events (so it
+    // can transition smoothly) — but that alone leaves its links keyboard-
+    // focusable while invisible. `inert` removes them from the tab order
+    // and from assistive tech too, matching what's actually on screen. This
+    // must only apply in mobile nav mode: on desktop the links are always
+    // genuinely visible regardless of the is-open class.
+    function syncNavInert() {
+      navLinks.inert = mobileNavQuery.matches && !navLinks.classList.contains("is-open");
+    }
+
+    syncNavInert();
+    mobileNavQuery.addEventListener("change", syncNavInert);
+    // Belt and braces: some environments don't reliably fire matchMedia's
+    // "change" listener on viewport changes (e.g. devtools/automation-driven
+    // resizes) even though real users resizing/rotating a browser do.
+    window.addEventListener("resize", syncNavInert, { passive: true });
+
     navToggle.addEventListener("click", function () {
       var isOpen = navLinks.classList.toggle("is-open");
       navToggle.setAttribute("aria-expanded", String(isOpen));
+      syncNavInert();
     });
 
     navLinks.querySelectorAll("a").forEach(function (link) {
       link.addEventListener("click", function () {
         navLinks.classList.remove("is-open");
         navToggle.setAttribute("aria-expanded", "false");
+        syncNavInert();
       });
     });
   }

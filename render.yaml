@@ -4,9 +4,32 @@ services:
     runtime: python
     plan: free
     buildCommand: "./build.sh"
-    startCommand: "gunicorn tal_academy.wsgi:application"
+    # --workers 2: the default single sync worker can only handle one
+    # request at a time, so a single slow request (e.g. a form submission
+    # waiting on a slow SMTP server) blocks every other visitor until it
+    # finishes. --timeout 30 matches EMAIL_TIMEOUT in settings.py so a
+    # stuck request gets killed at a predictable point either way.
+    startCommand: "gunicorn tal_academy.wsgi:application --workers 2 --timeout 30"
     envVars:
       - key: SECRET_KEY
         generateValue: true
       - key: PYTHON_VERSION
         value: "3.12.7"
+      # Email — sync: false means Render will prompt for these in the
+      # dashboard rather than deploying with a real credential baked in
+      # here. Without them, the site silently falls back to logging emails
+      # to the console instead of sending them — see README section 8.
+      - key: EMAIL_HOST
+        sync: false
+      - key: EMAIL_PORT
+        value: "587"
+      - key: EMAIL_HOST_USER
+        sync: false
+      - key: EMAIL_HOST_PASSWORD
+        sync: false
+      - key: EMAIL_USE_TLS
+        value: "True"
+      - key: DEFAULT_FROM_EMAIL
+        sync: false
+      - key: ACADEMY_NOTIFICATION_EMAIL
+        sync: false

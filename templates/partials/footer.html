@@ -11,11 +11,6 @@
           </span>
         </a>
         <p class="footer__tagline">A structured path from first moves to tournament mastery, led by titled coaches.</p>
-        <div class="footer__social">
-          <a href="#" aria-label="Instagram"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#icon-instagram"></use></svg></a>
-          <a href="#" aria-label="Facebook"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#icon-facebook"></use></svg></a>
-          <a href="#" aria-label="YouTube"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#icon-youtube"></use></svg></a>
-        </div>
       </div>
 
       <nav aria-label="Site">
@@ -32,19 +27,19 @@
       <nav aria-label="Programs">
         <h3 class="footer__heading">Programs</h3>
         <ul class="footer__links">
-          <li><a href="{% url 'programs' %}">Junior</a></li>
-          <li><a href="{% url 'programs' %}">Beginner</a></li>
-          <li><a href="{% url 'programs' %}">Intermediate</a></li>
-          <li><a href="{% url 'programs' %}">Advanced</a></li>
-          <li><a href="{% url 'programs' %}">Private Coaching</a></li>
+          <li><a href="{% url 'contact' %}?program=junior">Junior</a></li>
+          <li><a href="{% url 'contact' %}?program=beginner">Beginner</a></li>
+          <li><a href="{% url 'contact' %}?program=intermediate">Intermediate</a></li>
+          <li><a href="{% url 'contact' %}?program=advanced">Advanced</a></li>
+          <li><a href="{% url 'contact' %}?program=private">Private Coaching</a></li>
         </ul>
       </nav>
 
       <div>
         <h3 class="footer__heading">Contact</h3>
         <ul class="footer__links">
-          <li><a href="mailto:info@talchessacademy.example">info@talchessacademy.example</a></li>
-          <li><a href="tel:+10000000000">+1 (000) 000-0000</a></li>
+          <li><a href="mailto:contact@yourdomain.com">contact@yourdomain.com</a></li>
+          <li><a href="tel:+15550000000">+1 (555) 000-0000</a></li>
           <li><span>Academy Hall, Downtown Centre</span></li>
         </ul>
       </div>
