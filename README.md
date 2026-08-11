@@ -1,176 +1,310 @@
 # TAL Chess Academy
 
-A Django website for a chess academy: a public marketing site (home, programs,
-coaches, achievements, events, contact) backed by a real database — trial
-registrations and contact enquiries are saved to the database, staff manage
-them through Django admin, and email notifications go out automatically.
+A Django website for a chess academy: a public marketing site (home, about,
+programs, coaches, achievements, events, contact) backed by a real database —
+trial registrations and contact enquiries are saved to the database, staff
+manage them through Django admin, and email notifications go out
+automatically. No frontend framework or build step: vanilla CSS and vanilla
+JavaScript, on purpose (see "Design conventions" below).
 
-This README assumes little to no prior Django experience and spells out each
-step. If a command looks unfamiliar, read the sentence above it before running
-it — it explains what the command does and why.
-
-## How the project is organized
-
-```
-tal_academy/        Project-wide settings and URL routing
-academy/             The app: models, admin, views, API, emails, tests
-templates/           HTML pages
-static/              CSS and JavaScript
-requirements.txt     Python packages this project needs
-.env.example          Template listing which environment variables to set
-.env                    Your real, private settings (never committed to git)
-```
-
-The site has two kinds of URLs:
-- **Page routes** (`/`, `/about/`, `/contact/`, etc.) — render the HTML pages.
-- **API routes** (`/api/programs/`, `/api/registrations/`, `/api/contact/`) — accept form submissions as JSON. The "Book a Trial" and "Contact" forms on the site submit to these behind the scenes using JavaScript, without reloading the page.
+**If you're a Claude session picking this up with no memory of prior work**,
+read this whole file before touching code — it captures the architecture,
+the deliberate design decisions (and why), and what's genuinely still
+outstanding, so you don't have to rediscover any of it by reading every file.
 
 ---
 
-## 1. Install dependencies
+## Current status
 
-You need Python 3.12+ installed. Everything else is a Python package.
+The app is fully built and functionally complete: real models, admin, API,
+email notifications, tests, security hardening, and passes accessibility
+(WCAG 2.2 AA) and SEO audits performed earlier in this project's history.
+**It is not currently deployed anywhere** — it previously had a Render
+config in the repo, which has been deliberately removed (see "Deployment"
+below) so the project isn't tied to one host. There is no live URL right now.
 
-**Create a virtual environment** — this is a private, isolated copy of Python
-just for this project, so its packages don't clash with anything else on your
-machine:
+What's still placeholder, deliberately, rather than invented to look real:
+
+- **Contact details** in `templates/partials/footer.html` and
+  `templates/academy/contact.html` — email (`contact@yourdomain.com`), phone
+  (`+1 (555) 000-0000`), and address ("Academy Hall, Downtown Centre") are
+  all obvious placeholders. Replace with the real business's actual details
+  before going live. (A past product decision explicitly chose obvious
+  placeholders over fabricated-but-realistic-looking business data — don't
+  invent a phone number or address that *looks* real.)
+- **SMTP credentials** — `EMAIL_HOST` etc. are unset, so emails currently
+  print to the console instead of sending. Needs real credentials before
+  registration/contact notifications actually reach anyone (see "Email"
+  below).
+- **No `og:image`** — Open Graph/Twitter Card tags exist (`templates/base.html`)
+  but there's no image asset, so social shares fall back to a plain text
+  card. Add an image and an `og:image`/`twitter:image` tag if that matters.
+- **`SECRET_KEY`** in `.env` is a local dev-only value — generate a fresh one
+  for any real deployment (see "Configure your `.env` file" below).
+
+---
+
+## Tech stack
+
+- **Django 6.1** — the whole app: pages, admin, models, ORM.
+- **Django REST Framework** — the `/api/...` endpoints the frontend JS talks to.
+- **django-axes** — brute-force lockout protection on admin login.
+- **WhiteNoise** — serves and compresses static files directly from Django
+  (no separate static file server/CDN needed).
+- **gunicorn** — production WSGI server.
+- **dj-database-url** — parses a `DATABASE_URL` connection string into
+  Django's `DATABASES` setting.
+- **python-dotenv** — loads `.env` into environment variables locally.
+- **SQLite** in development, **Postgres** (or anything `dj-database-url`
+  understands) in production via `DATABASE_URL`.
+- **No frontend build step.** Plain CSS (with custom-property design tokens
+  in `static/css/tokens.css`) and plain JS, loaded directly as static files.
+  No npm, no bundler, no framework — this was a deliberate brief, not an
+  oversight; don't introduce a build pipeline unless explicitly asked.
+- **No CORS** — frontend and API are same-origin, so `django-cors-headers`
+  is neither installed nor needed.
+- **No Celery/Redis** — emails send synchronously; see the docstring at the
+  top of `academy/emails.py` for the explicit reasoning and the note on how
+  to swap to async later if volume ever justifies it.
+
+---
+
+## Project structure
+
+```
+tal_academy/            Project-wide settings and URL routing
+  settings.py              All configuration (env-driven, see below)
+  urls.py                  Top-level URL routes
+
+academy/                 The one Django app — all real logic lives here
+  models.py                 Program, TrialRegistration, ContactSubmission
+  admin.py                   Django admin configuration for those models
+  views.py                   Page views (render templates)
+  api_views.py                DRF API views (registrations, contact, programs)
+  api_urls.py                  /api/... routing
+  serializers.py                 DRF serializers + validation
+  emails.py                       Best-effort email sending, sync, no queue
+  middleware.py                    Adds X-Robots-Tag: noindex to admin/API
+  throttling.py                     Per-endpoint DRF throttle classes
+  sitemaps.py                        django.contrib.sitemaps classes
+  data.py                             Static content NOT in the database (see below)
+  tests.py                             Full test suite (models, API, email, security)
+  migrations/                          Including one that seeds the 5 initial programs
+
+templates/               HTML (Django template language)
+  base.html                 Shared shell: nav, footer, meta tags, skip link
+  academy/                    One template per page, plus emails/ (plaintext email bodies)
+  partials/                    Reusable includes (navbar, footer, cards, icon sprite)
+  404.html, 500.html            Custom branded error pages
+
+static/
+  css/                       tokens.css (design tokens), base.css, components.css, animations.css
+  js/                        main.js (nav/reveal/interactions), forms.js (AJAX form submission)
+  favicon.svg
+
+requirements.txt         Python dependencies
+.env.example              Template listing every environment variable
+.env                        Your real, private settings — gitignored, never committed
+db.sqlite3                   Local dev database (gitignored in real usage; present here for convenience)
+```
+
+The site has two kinds of URLs:
+- **Page routes** (`/`, `/about/`, `/contact/`, etc.) — `academy/views.py`
+  renders server-side HTML templates.
+- **API routes** (`/api/programs/`, `/api/registrations/`, `/api/contact/`)
+  — accept/return JSON. The "Book a Trial" and "General Enquiry" forms on
+  the contact page submit to these via `fetch()` in `static/js/forms.js`,
+  without a page reload. `/api/programs/` is also used to hydrate the
+  program dropdown.
+
+---
+
+## Data model
+
+Three real database models, all in `academy/models.py`:
+
+- **`Program`** — a course the academy offers (Junior, Beginner,
+  Intermediate, Advanced, Private Coaching). Editable in admin. Has
+  `is_active` (hide without deleting) and `display_order`. This used to be
+  a hardcoded Python list; it was promoted to a real model so staff can
+  edit programs without a code deploy. The original five are seeded by
+  migration `0002_seed_initial_programs.py`.
+- **`TrialRegistration`** — a "Book a Trial" submission. Write-only from the
+  public API (no GET/list endpoint) — staff only ever read these through
+  Django admin. Has a `status` workflow: New → Contacted → Trial Scheduled
+  → Enrolled (or Closed).
+- **`ContactSubmission`** — a general enquiry. Same write-only pattern, its
+  own simpler status workflow (New → In Progress → Resolved/Closed).
+
+**`academy/data.py` deliberately still holds plain Python data** — coach
+bios, "Why Us" points, stats, events, testimonials. These have no
+submission workflow and no current admin-editing requirement, so they were
+left as code rather than promoted to models. If a future request needs
+these editable through admin too, follow the same pattern used for
+`Program`: add a model, a migration to seed existing content, update
+`admin.py` and the relevant view in `views.py`. Don't do this preemptively.
+
+---
+
+## Design conventions worth knowing before you edit
+
+- **Security is intentionally strict.** `DEBUG` defaults to `False` (fails
+  closed, not open). `SECRET_KEY` raises `ImproperlyConfigured` at startup
+  if unset while `DEBUG=False`, rather than silently falling back to an
+  insecure key. DRF's `DEFAULT_PERMISSION_CLASSES` defaults to
+  `IsAuthenticated` — any new API view is private unless it explicitly opts
+  into `AllowAny`, so a forgotten `permission_classes` fails safe. The admin
+  login path is `staff-portal/` by default (not `/admin/`), configurable via
+  `ADMIN_URL`. `django-axes` locks out an IP+username pair after 5 failed
+  admin login attempts for 1 hour. All of this came out of an explicit
+  security audit earlier in the project — see git history for the full
+  original findings if you need the reasoning behind any specific setting.
+- **The two public API views (`RegistrationCreateAPIView`,
+  `ContactCreateAPIView`) explicitly set `authentication_classes = []`.**
+  This is load-bearing, not incidental: `SessionAuthentication` enforces
+  CSRF whenever it resolves a logged-in session, which would 403 any
+  visitor who happens to be logged into `/staff-portal/` in the same
+  browser, since `forms.js` never sends a CSRF token (these endpoints don't
+  need one — they're `AllowAny` and don't act on behalf of a session).
+  Don't remove this without understanding why it's there — it was a real
+  bug once (forms silently 403ing for logged-in staff testing their own
+  site) before this fix.
+- **ALLOWED_HOSTS / CSRF_TRUSTED_ORIGINS are entirely env-driven and
+  host-agnostic.** Set `ALLOWED_HOSTS` (comma-separated) in `.env` /
+  platform env vars; `CSRF_TRUSTED_ORIGINS` is derived from it
+  automatically (`https://` + each host). In `DEBUG` mode, localhost/
+  127.0.0.1 and common ngrok domains are added automatically so local dev
+  and ngrok tunnel previews work with zero config. This project previously
+  had Render-specific auto-detection (`RENDER_EXTERNAL_HOSTNAME`); that's
+  been removed entirely — the project is not tied to any one PaaS.
+- **Emails are synchronous and best-effort** (see `academy/emails.py`
+  docstring). A submission is always saved to the database first; email
+  sending happens after and never rolls back or blocks the response if it
+  fails — failures are logged, not raised. A 10s `EMAIL_TIMEOUT` prevents a
+  slow/dead mail server from hanging a visitor's form submission.
+  `ADMINS`/`SERVER_EMAIL` are also configured so Django emails the academy
+  automatically on any unhandled server crash in production.
+- **Accessibility (WCAG 2.2 AA) has already had a full audit-and-fix pass.**
+  Notable patterns already in place, worth preserving in any future edits:
+  `inert` attribute (not just `hidden`) on the closed mobile nav so its
+  links aren't tab-reachable; a skip-to-content link; `aria-invalid` +
+  `aria-describedby` wired per-field on both forms; full ARIA tabs keyboard
+  pattern (arrow keys) on the Book a Trial / General Enquiry toggle;
+  `--color-gold-contrast` used instead of the base gold wherever gold text
+  sits on the ivory `surface-inverse` background (base gold is ~2.5:1
+  contrast there, under the 4.5:1 AA minimum).
+- **SEO has already had a full audit-and-fix pass.** Canonical tags, Open
+  Graph + Twitter Card meta tags (via `{% block og_title %}` /
+  `{% block og_description %}` in `base.html` — note Django templates
+  cannot reuse the same block name twice in one template, which is why
+  these are separate blocks from `title`/`meta_description` with duplicated
+  text, not a shared block), `robots.txt` (see `academy/views.py:robots_txt`)
+  disallowing `/staff-portal/` and `/api/`, an `X-Robots-Tag: noindex`
+  header on those same paths via `academy/middleware.py`, and
+  `django.contrib.sitemaps` wired up in `tal_academy/urls.py` /
+  `academy/sitemaps.py`.
+- **Django template gotchas** hit and worked around in this codebase:
+  `{# #}` comments don't support multi-line content (they leak into
+  rendered HTML if you try) — use `{% comment %}...{% endcomment %}`
+  instead. `{{ block.super }}` only pulls the *parent template's* same-named
+  block, not a sibling block in the current template.
+
+---
+
+## Setup (local development)
+
+This section assumes little to no prior Django experience. If a command
+looks unfamiliar, read the sentence above it — it explains what and why.
+
+### 1. Install dependencies
+
+You need Python 3.12+.
 
 ```bash
 python -m venv venv
 ```
 
-**Activate it** (you'll need to do this every time you open a new terminal to
-work on this project):
-
+Activate it (every new terminal session):
 - Windows (PowerShell): `venv\Scripts\Activate.ps1`
 - Windows (cmd.exe): `venv\Scripts\activate.bat`
 - Mac/Linux: `source venv/bin/activate`
 
-Your terminal prompt should now start with `(venv)`. **Install the project's
-packages into it:**
+Your prompt should now start with `(venv)`. Install packages:
 
 ```bash
 pip install -r requirements.txt
 ```
 
-This installs Django itself, Django REST Framework (used for the `/api/...`
-endpoints), and a handful of small support packages — nothing exotic.
+### 2. Configure your `.env` file
 
----
-
-## 2. Configure your `.env` file
-
-Real secrets (database passwords, email credentials, etc.) never go directly
-in the code — they live in a file called `.env` that stays on your machine
-and is never uploaded to GitHub (it's listed in `.gitignore`).
-
-**Copy the template:**
+Real secrets never go directly in code — they live in `.env`, which is
+gitignored and never committed.
 
 ```bash
 cp .env.example .env
 ```
 
-(On Windows without `cp`, just duplicate `.env.example` in File Explorer and
-rename the copy to `.env`.)
+(No `cp` on Windows? Duplicate `.env.example` in File Explorer and rename
+the copy to `.env`.)
 
-Open `.env` in a text editor. At minimum, set `SECRET_KEY` to a random string
-— you can generate one with:
+At minimum, set `SECRET_KEY` to a random string:
 
 ```bash
 python manage.py shell -c "from django.core.management.utils import get_random_secret_key; print(get_random_secret_key())"
 ```
 
-Paste the output after `SECRET_KEY=`. Leave `DATABASE_URL` and the `EMAIL_*`
-variables blank for now — sensible local defaults kick in automatically (see
-sections 3 and 8 below).
+Paste the output after `SECRET_KEY=`. Leave `DATABASE_URL` and `EMAIL_*`
+blank for now — sensible local defaults kick in (see sections 3 and 8
+below). **`SECRET_KEY` is required whenever `DEBUG=False`** — the app
+refuses to start without it in that case, on purpose, rather than silently
+falling back to an insecure default.
 
-**`SECRET_KEY` is required whenever `DEBUG=False`.** The app will refuse to
-start (raising an error instead of running insecurely) if it's missing in
-that case — this is deliberate, so a forgotten env var fails loudly instead
-of silently running production with a weak, publicly-known key.
+### 3. The database
 
----
+Local dev uses **SQLite** — a single file (`db.sqlite3`), no server needed.
+Leaving `DATABASE_URL` blank in `.env` selects it automatically. Nothing to
+manually "create" — the next step does that.
 
-## 3. Create the database
-
-For local development, this project uses **SQLite** — a database that's just
-a single file (`db.sqlite3`) with no separate server to install or run. As
-long as `DATABASE_URL` is blank in your `.env`, Django uses it automatically.
-There's nothing to "create" — the next step (migrations) creates the file and
-its tables for you.
-
-(In production, you'd set `DATABASE_URL` to a real Postgres connection string
-instead — see section 9.)
-
----
-
-## 4. Run migrations
-
-Migrations are Django's way of building (and updating) your database's
-tables to match the models defined in `academy/models.py`. Run:
+### 4. Run migrations
 
 ```bash
 python manage.py migrate
 ```
 
-You'll see a list of migrations being applied, including one called
-`0002_seed_initial_programs` — that one pre-populates the database with the
-five programs (Junior, Beginner, Intermediate, Advanced, Private Coaching)
-shown on the site, so you don't start with an empty Programs list.
+Includes `0002_seed_initial_programs`, which pre-populates the five
+programs shown on the site. Re-run this any time you pull code with new
+migrations.
 
-Run this command again any time you pull code that adds new migrations.
-
----
-
-## 5. Create an admin account
-
-This account lets you log in to the admin panel to view and manage trial
-registrations, contact enquiries, and programs.
+### 5. Create an admin account
 
 ```bash
 python manage.py createsuperuser
 ```
 
-It'll ask for a username, email, and password (the password won't be shown
-as you type — that's normal). **Choose a genuinely strong, unique password**
-— repeated failed logins get locked out for an hour after 5 attempts (via
-`django-axes`), but that's a backstop, not a substitute for a strong password.
+Choose a genuinely strong password — `django-axes` locks out repeated
+failed attempts (a backstop, not a substitute). Log in at
+`http://127.0.0.1:8000/staff-portal/` (or your own `ADMIN_URL` if you set
+one) once the server is running.
 
-Once created, you can log in at `http://127.0.0.1:8000/staff-portal/` after
-starting the server (next step). The admin path is intentionally not the
-well-known `/admin/` — it's controlled by the `ADMIN_URL` env var (defaults
-to `staff-portal/`; set your own in `.env` if you'd like a different one).
-
----
-
-## 6. Start the development server
+### 6. Start the dev server
 
 ```bash
 python manage.py runserver
 ```
 
-Visit `http://127.0.0.1:8000/` in your browser — that's the site. Visit
-`http://127.0.0.1:8000/staff-portal/` (or your own `ADMIN_URL`, see step 5)
-and log in with the account from step 5 to see the admin panel: registrations
-and enquiries under **Academy**, where you can filter by status, search, and
-update each one's status (New → Contacted → Trial Scheduled → Enrolled, etc.).
+Site: `http://127.0.0.1:8000/`. Admin: `http://127.0.0.1:8000/staff-portal/`
+— registrations and enquiries live under **Academy**, filterable/searchable,
+with a status field you can update per entry.
 
-Leave this command running in its terminal while you work; press `Ctrl+C` to
-stop it.
+### 7. Try the API
 
----
+**Browser:** with the server running, visit
+`http://127.0.0.1:8000/api/programs/` — DRF's browsable API renders the
+JSON readably and even lets you POST test submissions via an HTML form
+(only shown when `DEBUG=True`; production serves JSON only, deliberately —
+see `REST_FRAMEWORK['DEFAULT_RENDERER_CLASSES']` in `settings.py`).
 
-## 7. Test the API
-
-There are two ways to try the API:
-
-**A) In your browser (easiest).** With the server running, visit
-`http://127.0.0.1:8000/api/programs/` — Django REST Framework renders a
-readable page showing the JSON response, and even lets you submit test POST
-requests to `/api/registrations/` and `/api/contact/` using an HTML form at
-the bottom of the page, without writing any code.
-
-**B) With `curl`,** to see the raw JSON:
+**curl:**
 
 ```bash
 curl http://127.0.0.1:8000/api/programs/
@@ -180,31 +314,16 @@ curl -X POST http://127.0.0.1:8000/api/contact/ \
   -d "{\"name\":\"Test\",\"email\":\"test@example.com\",\"subject\":\"Hi\",\"message\":\"Hello there\"}"
 ```
 
-A successful submission returns `{"success": true, "message": "..."}` with
-status `201`. An invalid one returns `{"success": false, "errors": {...}}`
-with status `400`, listing exactly what was wrong with each field.
+A success returns `{"success": true, "message": "..."}` (201). An invalid
+submission returns `{"success": false, "errors": {...}}` (400) listing
+exactly what was wrong per field.
 
-**Automated tests.** The project also has a full test suite covering
-successful/invalid submissions, spam protection, email sending, and access
-control. Run it with:
+### 8. Configure email
 
-```bash
-python manage.py test academy
-```
-
-You should see `OK` at the end with no failures.
-
----
-
-## 8. Configure email
-
-By default (when `EMAIL_HOST` is blank in `.env`), emails aren't actually
-sent anywhere — they're printed to the terminal running `runserver` instead.
-This is intentional: it lets you see exactly what an email would say, without
-needing a real mail account while developing.
-
-**To send real email**, fill in the `EMAIL_*` variables in `.env`. For
-example, using Gmail:
+By default (`EMAIL_HOST` blank), email prints to the console running
+`runserver` instead of actually sending — lets you see the content without
+a real mail account. To send real email, fill in `EMAIL_*` in `.env`, e.g.
+Gmail:
 
 ```
 EMAIL_HOST=smtp.gmail.com
@@ -216,64 +335,76 @@ DEFAULT_FROM_EMAIL=youracademyemail@gmail.com
 ACADEMY_NOTIFICATION_EMAIL=info@talchessacademy.example
 ```
 
-`EMAIL_HOST_PASSWORD` for Gmail must be an **App Password**, not your regular
-login password — generate one at
-[myaccount.google.com/apppasswords](https://myaccount.google.com/apppasswords)
-(requires 2-factor authentication to be enabled on the account). Any other
-SMTP provider (SendGrid, Mailgun, your web host's email, etc.) works the same
-way — just use the host/port/credentials they give you.
+Gmail requires an **App Password** (not your login password) — generate one
+at [myaccount.google.com/apppasswords](https://myaccount.google.com/apppasswords)
+(needs 2FA enabled). Any other SMTP provider works the same way with its
+own host/port/credentials. `ACADEMY_NOTIFICATION_EMAIL` is where new
+submission alerts go — can differ from `DEFAULT_FROM_EMAIL`. Restart
+`runserver` after editing `.env`.
 
-`ACADEMY_NOTIFICATION_EMAIL` is where new registration/enquiry alerts get
-sent — it can be different from `DEFAULT_FROM_EMAIL`.
-
-Restart `runserver` after changing `.env` for the change to take effect.
-
-**A submission is never lost if email fails.** The database record is always
-saved first; sending the notification/confirmation emails happens afterward
-and is "best effort" — if your SMTP settings are wrong or the mail server is
-briefly down, the submission still shows up in `/admin/`, and the failure is
-written to the server log so you can diagnose it. A 10-second `EMAIL_TIMEOUT`
-also means a slow/unreachable mail server fails fast instead of leaving the
-visitor's browser hanging on a stuck "submitting…" state.
-
-**You'll also get emailed automatically if the site ever crashes.** Once
-`DEBUG=False`, Django emails `ACADEMY_NOTIFICATION_EMAIL` on any unhandled
-server error, with the full traceback — no extra setup needed beyond the
-email config above.
+A submission is never lost if email fails — the database write always
+happens first; email is best-effort afterward (see "Design conventions").
+You'll also get emailed automatically if the site crashes in production
+(`DEBUG=False`), no extra setup beyond the config above.
 
 ---
 
-## 9. Deploy the backend
+## Testing
 
-This project is set up to deploy on [Render](https://render.com) using the
-`render.yaml` file already in the repo (see `build.sh` for the exact build
-steps: install dependencies, collect static files, run migrations).
+```bash
+python manage.py test academy
+```
 
-`render.yaml` already declares the email variables below — Render will show
-them in the dashboard as needing a value ("sync: false") rather than
-deploying with anything guessed or hardcoded. **The site works without them
-filled in** (it falls back to logging emails to the console instead of
-sending them — see section 8), but real registrations/enquiries won't
-actually reach anyone by email until you set them:
+Full suite covering model behavior, successful/invalid API submissions,
+spam protection (honeypot field + throttling), email sending (mocked
+SMTP failure included), and access control (write-only endpoints, admin
+auth). Should finish with `OK`, 20 tests, no failures.
 
-- `SECRET_KEY` — Render auto-generates this for you (already configured in `render.yaml`). **Required** — the app won't start without it once `DEBUG` is off (which it is by default in production).
-- `DATABASE_URL` — if you add a Render Postgres database, Render can inject this automatically; otherwise the site falls back to SQLite (fine for low-traffic use, but **data doesn't persist across redeploys on Render's free tier** — don't collect real submissions until this is set).
-- `EMAIL_HOST`, `EMAIL_PORT`, `EMAIL_HOST_USER`, `EMAIL_HOST_PASSWORD`, `EMAIL_USE_TLS`, `DEFAULT_FROM_EMAIL`, `ACADEMY_NOTIFICATION_EMAIL` — same values as section 8, set as env vars instead of `.env` entries.
-- `ADMIN_URL` — optional, only if you want a different admin login path than the default `staff-portal/`.
-- `ALLOWED_HOSTS` — only needed if deploying somewhere other than Render (Render's hostname is detected automatically via `RENDER_EXTERNAL_HOSTNAME`).
+```bash
+python manage.py check
+```
 
-Deploying anywhere other than Render works the same way — set the same
-environment variables through whatever mechanism that host provides.
+Django's system check framework — run this after any settings.py change.
 
-After deploying, run the admin-account step (5) against the live service —
-Render's dashboard has a "Shell" tab where you can run
-`python manage.py createsuperuser` directly on the deployed app.
+---
 
-No background task system (Celery/Redis) is used or needed — see the
-docstring at the top of `academy/emails.py` for why that's a deliberate
-choice at this project's scale, not an oversight.
+## Deployment
 
-**Two other production details, already handled:**
-- The web server (`gunicorn`) runs with 2 workers so one slow request (e.g. a form submission waiting on a slow mail server) doesn't block every other visitor — see the `startCommand` in `render.yaml`.
-- Branded `404`/`500` error pages, a favicon, and `robots.txt`/`sitemap.xml` are already in place — nothing to configure.
-- [Dependabot](https://github.com/dependabot) is enabled (`.github/dependabot.yml`) and will open a PR automatically if a dependency in `requirements.txt` gets a known vulnerability fix.
+This project is **host-agnostic on purpose** — no PaaS-specific config file
+is checked in (a previous Render Blueprint config was deliberately removed
+so the project isn't tied to one platform). To deploy anywhere (a VPS,
+Railway, Fly.io, PythonAnywhere, Render, etc.), the pattern is the same:
+
+1. Install dependencies: `pip install -r requirements.txt`
+2. Set environment variables on the host (same names as `.env.example`):
+   - `SECRET_KEY` — **required**. Generate with the command in step 2 above.
+   - `DEBUG` — leave unset or `False` in production.
+   - `ALLOWED_HOSTS` — **required**. Comma-separated real domain(s), e.g.
+     `example.com,www.example.com`. `CSRF_TRUSTED_ORIGINS` derives from
+     this automatically.
+   - `DATABASE_URL` — a Postgres connection string is strongly recommended
+     for anything beyond a demo; SQLite has no persistence guarantee across
+     redeploys on most platforms.
+   - `EMAIL_HOST`, `EMAIL_PORT`, `EMAIL_HOST_USER`, `EMAIL_HOST_PASSWORD`,
+     `EMAIL_USE_TLS`, `DEFAULT_FROM_EMAIL`, `ACADEMY_NOTIFICATION_EMAIL` —
+     see "Configure email" above. Site works without these set (falls back
+     to console logging) but real submissions won't reach anyone by email.
+   - `ADMIN_URL` — optional, only if you want something other than the
+     default `staff-portal/`.
+3. Collect static files: `python manage.py collectstatic --no-input`
+   (WhiteNoise serves these directly from Django — no separate static host
+   needed).
+4. Run migrations: `python manage.py migrate`
+5. Start the app with gunicorn, e.g.:
+   `gunicorn tal_academy.wsgi:application --workers 2 --timeout 30`
+   (2 workers so one slow request — e.g. waiting on a slow mail server —
+   doesn't block every other visitor.)
+6. Create the admin account on the live service:
+   `python manage.py createsuperuser` (via SSH/shell access, however your
+   host provides it).
+
+No background task system (Celery/Redis) is needed — see "Tech stack"
+above. Branded 404/500 pages, a favicon, and `robots.txt`/`sitemap.xml` are
+already wired up, nothing to configure. [Dependabot](https://github.com/dependabot)
+is enabled (`.github/dependabot.yml`) and opens a PR automatically if a
+`requirements.txt` dependency gets a known-vulnerability fix.

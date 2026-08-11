@@ -21,8 +21,8 @@ from dotenv import load_dotenv
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 # Loads variables from a local .env file into the environment. This is a
-# no-op if .env doesn't exist, which is the case in production hosts (Render,
-# etc.) where env vars are injected directly by the platform instead.
+# no-op if .env doesn't exist, which is the case on most production hosts,
+# where env vars are injected directly by the platform instead.
 load_dotenv(BASE_DIR / '.env')
 
 
@@ -35,7 +35,7 @@ load_dotenv(BASE_DIR / '.env')
 DEBUG = os.getenv('DEBUG', 'False').strip().lower() == 'true'
 
 # SECURITY WARNING: keep the secret key used in production secret!
-# Always supplied via the SECRET_KEY env var (see .env.example / render.yaml).
+# Always supplied via the SECRET_KEY env var (see .env.example).
 # In production (DEBUG=False) we refuse to start rather than silently fall
 # back to an insecure, publicly-committed default key.
 SECRET_KEY = os.getenv('SECRET_KEY')
@@ -53,26 +53,25 @@ _extra_hosts = os.getenv('ALLOWED_HOSTS', '')
 if _extra_hosts:
     ALLOWED_HOSTS += [host.strip() for host in _extra_hosts.split(',') if host.strip()]
 
-RENDER_EXTERNAL_HOSTNAME = os.getenv('RENDER_EXTERNAL_HOSTNAME')
-CSRF_TRUSTED_ORIGINS = []
-if RENDER_EXTERNAL_HOSTNAME:
-    ALLOWED_HOSTS.append(RENDER_EXTERNAL_HOSTNAME)
-    CSRF_TRUSTED_ORIGINS.append(f'https://{RENDER_EXTERNAL_HOSTNAME}')
+# Derived from ALLOWED_HOSTS rather than hardcoded to any one host's
+# auto-injected hostname variable, so this works the same on any platform.
+CSRF_TRUSTED_ORIGINS = [f'https://{host}' for host in ALLOWED_HOSTS]
+
 if DEBUG:
     ALLOWED_HOSTS += ['localhost', '127.0.0.1', '.ngrok-free.dev', '.ngrok-free.app', '.ngrok.io', '.ngrok.app']
     CSRF_TRUSTED_ORIGINS += [
         'https://*.ngrok-free.dev', 'https://*.ngrok-free.app', 'https://*.ngrok.io', 'https://*.ngrok.app'
     ]
 
-# Render (and most PaaS hosts) terminate TLS at their proxy and forward plain
-# HTTP, so trust their header to know when a request was actually HTTPS.
+# Most PaaS hosts and reverse proxies terminate TLS at the proxy and forward
+# plain HTTP, so trust their header to know when a request was actually HTTPS.
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 
 if not DEBUG:
-    # Safe, reversible hardening — Render always serves over HTTPS, so these
-    # have no downside. HSTS is deliberately left off: browsers cache it for
-    # the duration you set, which makes it awkward to undo if something's
-    # misconfigured. Turn it on once HTTPS is confirmed stable in production:
+    # Safe, reversible hardening — assumes production is always served over
+    # HTTPS, which it should be. HSTS is deliberately left off: browsers
+    # cache it for the duration you set, which makes it awkward to undo if
+    # something's misconfigured. Turn it on once HTTPS is confirmed stable:
     #   SECURE_HSTS_SECONDS = 31536000
     SECURE_SSL_REDIRECT = True
     SESSION_COOKIE_SECURE = True
@@ -140,14 +139,14 @@ WSGI_APPLICATION = 'tal_academy.wsgi.application'
 
 # Database
 # https://docs.djangoproject.com/en/6.1/ref/settings/#databases
-# Uses DATABASE_URL when set (e.g. Postgres on Render); otherwise falls back
-# to a local SQLite file, which is fine for development.
+# Uses DATABASE_URL when set (e.g. a managed Postgres instance); otherwise
+# falls back to a local SQLite file, which is fine for development.
 
 DATABASE_URL = os.getenv('DATABASE_URL')
 if DATABASE_URL:
-    # conn_health_checks: managed Postgres (e.g. Render's) periodically drops
-    # idle connections; without this, Django can hand out a dead connection
-    # from its pool and error on the next request that uses it.
+    # conn_health_checks: managed Postgres providers periodically drop idle
+    # connections; without this, Django can hand out a dead connection from
+    # its pool and error on the next request that uses it.
     DATABASES = {'default': dj_database_url.parse(DATABASE_URL, conn_max_age=600, conn_health_checks=True)}
 else:
     DATABASES = {
@@ -252,10 +251,10 @@ SERVER_EMAIL = DEFAULT_FROM_EMAIL
 # blunt basic spam/abuse; the read-only programs list gets a more generous cap.
 
 REST_FRAMEWORK = {
-    # Both Render and the ngrok dev tunnel sit exactly one proxy hop in front
-    # of the app. Without this, DRF trusts the client-supplied X-Forwarded-For
-    # header verbatim, which lets a client spoof a different "identity" on
-    # every request and bypass the throttles below entirely.
+    # Most PaaS hosts (and the ngrok dev tunnel) sit exactly one proxy hop in
+    # front of the app. Without this, DRF trusts the client-supplied
+    # X-Forwarded-For header verbatim, which lets a client spoof a different
+    # "identity" on every request and bypass the throttles below entirely.
     'NUM_PROXIES': 1,
     'DEFAULT_THROTTLE_CLASSES': [
         'rest_framework.throttling.AnonRateThrottle',
