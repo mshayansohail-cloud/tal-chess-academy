@@ -26,6 +26,12 @@
     // resizes) even though real users resizing/rotating a browser do.
     window.addEventListener("resize", syncNavInert, { passive: true });
 
+    function closeNav() {
+      navLinks.classList.remove("is-open");
+      navToggle.setAttribute("aria-expanded", "false");
+      syncNavInert();
+    }
+
     navToggle.addEventListener("click", function () {
       var isOpen = navLinks.classList.toggle("is-open");
       navToggle.setAttribute("aria-expanded", String(isOpen));
@@ -33,11 +39,22 @@
     });
 
     navLinks.querySelectorAll("a").forEach(function (link) {
-      link.addEventListener("click", function () {
-        navLinks.classList.remove("is-open");
-        navToggle.setAttribute("aria-expanded", "false");
-        syncNavInert();
-      });
+      link.addEventListener("click", closeNav);
+    });
+
+    // Click outside the open menu (and outside the toggle button itself,
+    // which has its own handler above) closes it.
+    document.addEventListener("click", function (event) {
+      if (!navLinks.classList.contains("is-open")) return;
+      if (navLinks.contains(event.target) || navToggle.contains(event.target)) return;
+      closeNav();
+    });
+
+    document.addEventListener("keydown", function (event) {
+      if (event.key === "Escape" && navLinks.classList.contains("is-open")) {
+        closeNav();
+        navToggle.focus();
+      }
     });
   }
 
