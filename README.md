@@ -189,10 +189,17 @@ these editable through admin too, follow the same pattern used for
   slow/dead mail server from hanging a visitor's form submission.
   `ADMINS`/`SERVER_EMAIL` are also configured so Django emails the academy
   automatically on any unhandled server crash in production.
+- **The mobile nav's full interaction contract** (see `static/js/main.js`):
+  `inert` on the closed menu so its links aren't tab-reachable, closes on
+  link click, on click-outside, and on Escape (which also returns focus to
+  the toggle button), and `overflow-y: auto` on the menu panel itself so it
+  scrolls rather than clipping its own content — this last one is easy to
+  lose if the panel's markup changes, and only shows up in landscape
+  orientation on a phone (short viewport height), not in normal portrait
+  testing, so it's easy to reintroduce without noticing.
 - **Accessibility (WCAG 2.2 AA) has already had a full audit-and-fix pass.**
   Notable patterns already in place, worth preserving in any future edits:
-  `inert` attribute (not just `hidden`) on the closed mobile nav so its
-  links aren't tab-reachable; a skip-to-content link; `aria-invalid` +
+  a skip-to-content link; `aria-invalid` +
   `aria-describedby` wired per-field on both forms; full ARIA tabs keyboard
   pattern (arrow keys) on the Book a Trial / General Enquiry toggle;
   `--color-gold-contrast` used instead of the base gold wherever gold text
