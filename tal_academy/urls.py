@@ -16,6 +16,7 @@ urlpatterns = [
     path('api/', include('academy.api_urls')),
     path('sitemap.xml', sitemap, {'sitemaps': sitemaps}, name='sitemap'),
     path('robots.txt', views.robots_txt, name='robots_txt'),
+    path('llms.txt', views.llms_txt, name='llms_txt'),
     path('', views.home, name='home'),
     path('about/', views.about, name='about'),
     path('programs/', views.programs, name='programs'),

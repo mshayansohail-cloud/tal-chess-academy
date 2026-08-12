@@ -1,6 +1,7 @@
 from django.conf import settings
 from django.http import Http404, HttpResponse
 from django.shortcuts import render
+from django.urls import reverse
 
 from . import data
 from .models import Program
@@ -78,3 +79,35 @@ def robots_txt(request):
         f'Sitemap: {sitemap_url}',
     ]
     return HttpResponse('\n'.join(lines), content_type='text/plain')
+
+
+def llms_txt(request):
+    """
+    https://llmstxt.org/ — a Markdown summary for AI agents/LLMs, pointing
+    at the same public page set as the sitemap (see academy/sitemaps.py).
+    Links are built with build_absolute_uri() so the domain always matches
+    whatever host actually served the request, in dev or production.
+    """
+    pages = [
+        ('home', 'Home', 'Overview of the academy and its programs'),
+        ('about', 'About', "The academy's philosophy and teaching approach"),
+        ('programs', 'Programs', 'Course offerings by skill level, from first moves to private coaching'),
+        ('coaches', 'Coaches', 'FIDE-titled coaching staff'),
+        ('achievements', 'Achievements', "Students' tournament results and the academy's milestones"),
+        ('events', 'Events', 'Upcoming tournaments and academy events'),
+        ('contact', 'Contact', 'Book a trial lesson or send a general enquiry'),
+    ]
+    lines = [
+        '# TAL Chess Academy',
+        '',
+        'TAL Chess Academy trains players from first moves to tournament mastery, '
+        'led by FIDE-titled coaches in a structured, competitive environment.',
+        '',
+        '## Pages',
+        '',
+    ]
+    for url_name, label, desc in pages:
+        url = request.build_absolute_uri(reverse(url_name))
+        lines.append(f'- [{label}]({url}): {desc}')
+
+    return HttpResponse('\n'.join(lines), content_type='text/markdown; charset=utf-8')
