@@ -102,6 +102,17 @@ class RegistrationAPITests(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertIn('program', response.json()['errors'])
 
+    def test_minor_without_parent_name_is_rejected(self):
+        payload = dict(self.valid_payload, student_age=15, parent_name='')
+        response = self.client.post('/api/registrations/', payload, format='json')
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertIn('parent_name', response.json()['errors'])
+
+    def test_adult_without_parent_name_is_accepted(self):
+        payload = dict(self.valid_payload, student_age=25, parent_name='')
+        response = self.client.post('/api/registrations/', payload, format='json')
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+
     def test_honeypot_field_silently_blocks_spam_submission(self):
         payload = dict(self.valid_payload, website='http://spam.example')
         response = self.client.post('/api/registrations/', payload, format='json')

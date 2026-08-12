@@ -40,6 +40,26 @@
     });
   });
 
+  /* Parent/Guardian name becomes required once Student age indicates a
+     minor. This mirrors the server-side check in TrialRegistrationSerializer
+     for immediate feedback — the server enforces it regardless of whether
+     this runs, so it's a UX nicety, not the actual safeguard. */
+  var ageInput = document.getElementById("id_student_age");
+  var parentInput = document.getElementById("id_parent_name");
+  var parentMarker = document.getElementById("id_parent_name_marker");
+
+  function syncParentNameRequirement() {
+    var age = parseInt(ageInput.value, 10);
+    var isMinor = !isNaN(age) && age < 18;
+    parentInput.required = isMinor;
+    if (parentMarker) parentMarker.hidden = !isMinor;
+  }
+
+  if (ageInput && parentInput) {
+    syncParentNameRequirement();
+    ageInput.addEventListener("input", syncParentNameRequirement);
+  }
+
   function showFeedback(message, isError) {
     if (!feedback) return;
     feedback.textContent = message;

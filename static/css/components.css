@@ -1031,6 +1031,12 @@
   color: var(--text-muted);
 }
 
+.field-hint {
+  margin-top: var(--space-2);
+  font-size: var(--fs-2xs);
+  color: var(--text-muted);
+}
+
 .form-errors {
   margin-top: var(--space-2);
   font-size: var(--fs-xs);

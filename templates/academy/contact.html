@@ -83,10 +83,14 @@
               <p class="form-errors" id="id_student_name_error" data-error-for="student_name"></p>
             </div>
             <div>
-              <label class="form-label" for="id_parent_name">Parent/Guardian name</label>
+              <label class="form-label" for="id_parent_name">
+                Parent/Guardian name
+                <span class="required-marker" id="id_parent_name_marker" aria-hidden="true" hidden>*</span>
+              </label>
               <input class="form-input" type="text" id="id_parent_name" name="parent_name" maxlength="120"
-                     autocomplete="off" aria-describedby="id_parent_name_error"
+                     autocomplete="off" aria-describedby="id_parent_name_hint id_parent_name_error"
                      placeholder="Leave blank for adult students">
+              <p class="field-hint" id="id_parent_name_hint">Required for students under 18 — optional for adults.</p>
               <p class="form-errors" id="id_parent_name_error" data-error-for="parent_name"></p>
             </div>
           </div>

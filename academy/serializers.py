@@ -42,6 +42,17 @@ class TrialRegistrationSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError('This field may not be blank.')
         return value
 
+    def validate(self, data):
+        # Adults register themselves — parent_name is genuinely optional for
+        # them. A minor needs a named parent/guardian on the record, so this
+        # is the one case where it's required. The client mirrors this (see
+        # forms.js) for immediate feedback, but this check is what actually
+        # enforces it — a request that skips the browser entirely still hits
+        # this validation.
+        if data.get('student_age', 0) < 18 and not data.get('parent_name', '').strip():
+            raise serializers.ValidationError({'parent_name': 'Required for students under 18.'})
+        return data
+
     def create(self, validated_data):
         validated_data.pop('website', None)
         return TrialRegistration.objects.create(**validated_data)
