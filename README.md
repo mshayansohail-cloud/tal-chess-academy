@@ -202,7 +202,13 @@ these editable through admin too, follow the same pattern used for
   disallowing `/staff-portal/` and `/api/`, an `X-Robots-Tag: noindex`
   header on those same paths via `academy/middleware.py`, and
   `django.contrib.sitemaps` wired up in `tal_academy/urls.py` /
-  `academy/sitemaps.py`.
+  `academy/sitemaps.py`. There's also an `/llms.txt` (see
+  `academy/views.py:llms_txt`) — a Markdown summary for AI agents/LLMs
+  following the [llms.txt](https://llmstxt.org/) convention, listing the
+  same public page set as the sitemap. Both `robots.txt` and `llms.txt`
+  build their links with `request.build_absolute_uri()`, so they always
+  reflect whatever host actually served the request — no hardcoded domain
+  to keep in sync with `ALLOWED_HOSTS`.
 - **Django template gotchas** hit and worked around in this codebase:
   `{# #}` comments don't support multi-line content (they leak into
   rendered HTML if you try) — use `{% comment %}...{% endcomment %}`
@@ -404,7 +410,7 @@ Railway, Fly.io, PythonAnywhere, Render, etc.), the pattern is the same:
    host provides it).
 
 No background task system (Celery/Redis) is needed — see "Tech stack"
-above. Branded 404/500 pages, a favicon, and `robots.txt`/`sitemap.xml` are
-already wired up, nothing to configure. [Dependabot](https://github.com/dependabot)
+above. Branded 404/500 pages, a favicon, and `robots.txt`/`sitemap.xml`/
+`llms.txt` are already wired up, nothing to configure. [Dependabot](https://github.com/dependabot)
 is enabled (`.github/dependabot.yml`) and opens a PR automatically if a
 `requirements.txt` dependency gets a known-vulnerability fix.
