@@ -939,6 +939,28 @@
   font-size: var(--fs-md);
 }
 
+.contact-expect {
+  margin-top: var(--space-7);
+}
+
+.contact-expect__list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.contact-expect__list li {
+  font-size: var(--fs-sm);
+  color: var(--text-muted);
+  line-height: var(--lh-normal);
+}
+
+.contact-expect__num {
+  color: var(--color-gold);
+  font-family: var(--font-display);
+  margin-right: var(--space-2);
+}
+
 .form-row {
   margin-bottom: var(--space-5);
 }
