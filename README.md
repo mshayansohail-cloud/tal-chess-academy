@@ -41,6 +41,11 @@ What's still placeholder, deliberately, rather than invented to look real:
   card. Add an image and an `og:image`/`twitter:image` tag if that matters.
 - **`SECRET_KEY`** in `.env` is a local dev-only value — generate a fresh one
   for any real deployment (see "Configure your `.env` file" below).
+- **`/privacy/`'s content hasn't had legal review** — it's an accurate plain-
+  language description of what the code actually does today, and says so
+  explicitly, but it isn't a substitute for review by a qualified legal/
+  privacy professional, and its retention-period wording needs an actual
+  number once one's decided (see "Data retention & privacy" below).
 
 ---
 
@@ -371,6 +376,43 @@ python manage.py check
 ```
 
 Django's system check framework — run this after any settings.py change.
+
+---
+
+## Data retention & privacy
+
+A full privacy/data-handling audit was done on this codebase — see git history
+for the complete findings. What it led to, concretely:
+
+- **`/privacy/`** — a plain-language privacy policy page (linked from the
+  footer, included in the sitemap) describing what the two public forms
+  collect, why, who it's shared with, and how to request a copy/correction/
+  deletion. It's explicitly labeled as *not* legal advice — review it with
+  a qualified professional before using this site to collect data from real
+  visitors, and fill in the real retention period once you've decided one
+  (see below).
+- **`SUBMISSION_RETENTION_DAYS`** (env var, see `.env.example`) — optional,
+  no default. When set, `python manage.py purge_old_submissions` deletes
+  `TrialRegistration`/`ContactSubmission` rows that are *both* older than
+  this many days *and* already in a terminal status (Enrolled/Closed/
+  Resolved) — open leads are never touched regardless of age. Use
+  `--dry-run` to preview counts first. This isn't scheduled automatically;
+  run it manually or wire it into a cron/scheduled task on your host once
+  you've decided on an actual retention period — this command deliberately
+  doesn't guess one for you.
+- **`django-axes`'s own failed-login records** (IP + username, on admin
+  login attempts) aren't covered by the command above — axes ships its own
+  `python manage.py axes_reset_logs --age <days>` for that; also worth
+  scheduling periodically if you want those pruned too.
+- **Email failure logs don't include submitter PII** — `academy/emails.py`
+  logs the template name on a send failure, not the subject (which could
+  contain a student's name) or the recipient address.
+- **Fonts are self-hosted** (`static/fonts/`, `static/css/fonts.css`) rather
+  than loaded from Google Fonts — no third-party font request means no
+  visitor IP/User-Agent goes to Google on page load. Only the Latin subset
+  is included, which covers everything this site's content actually uses;
+  if you add content requiring other scripts, you'll need to source
+  additional subsets.
 
 ---
 

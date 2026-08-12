@@ -1,0 +1,85 @@
+{% extends "base.html" %}
+
+{% block title %}Privacy Policy — TAL Chess Academy{% endblock %}
+{% block meta_description %}What information TAL Chess Academy collects through its trial and enquiry forms, why, who receives it, and how to request a copy, correction, or deletion.{% endblock %}
+{% block og_title %}Privacy Policy — TAL Chess Academy{% endblock %}
+{% block og_description %}What information TAL Chess Academy collects through its trial and enquiry forms, why, who receives it, and how to request a copy, correction, or deletion.{% endblock %}
+
+{% block content %}
+
+<header class="page-header">
+  <div class="container">
+    <p class="breadcrumb"><a href="{% url 'home' %}">Home</a> / Privacy Policy</p>
+    <h1 class="page-header__title">Privacy Policy</h1>
+    <p class="page-header__desc">Last updated {% now "F Y" %}.</p>
+  </div>
+</header>
+
+<section class="section">
+  <div class="container prose">
+
+    <p>
+      This page explains what information TAL Chess Academy collects through this website, why, who
+      it's shared with, and how you can ask about, correct, or delete it. It applies to the
+      trial-booking and contact forms on this site specifically — not to anything you might
+      separately share with the Academy in person, by phone, or elsewhere.
+    </p>
+
+    <p>
+      <strong>This page is a plain description of what the site actually does, not a legal document.</strong>
+      It hasn't been reviewed by a lawyer, doesn't claim compliance with any specific privacy law
+      (GDPR, CCPA, or otherwise), and should be reviewed by a qualified legal or privacy professional
+      before this site is used to collect information from real visitors.
+    </p>
+
+    <h2>What we collect</h2>
+    <p>When you submit the "Book a Trial" form, we collect:</p>
+    <ul>
+      <li>Student name and age</li>
+      <li>Parent/guardian name (if provided)</li>
+      <li>Phone number and email address</li>
+      <li>Chess experience level and program of interest</li>
+      <li>Preferred schedule and any message you include (both optional)</li>
+    </ul>
+    <p>When you submit the "General Enquiry" form, we collect your name, email, phone number (optional),
+      subject, and message.</p>
+    <p>We don't collect payment information, and we don't use analytics or advertising cookies —
+      the only cookies this site sets are functional ones used by staff logging in to manage
+      submissions, not anything that tracks visitors browsing the public pages.</p>
+
+    <h2>Why we collect it</h2>
+    <p>Solely to respond to your trial request or enquiry — to get in touch, schedule a trial lesson,
+      place a student at the appropriate level, and answer your question. We don't use it for
+      marketing, and we don't sell or rent it to anyone.</p>
+
+    <h2>Who it's shared with</h2>
+    <ul>
+      <li><strong>Academy staff</strong>, to review and respond to your submission.</li>
+      <li><strong>Our email service provider</strong>, to deliver the confirmation email you receive and
+        the notification staff receive — the content of that email includes what you submitted.</li>
+      <li><strong>Our hosting provider</strong>, who stores the underlying database on our behalf.</li>
+    </ul>
+    <p>We don't share submitted information with any other third party, and we don't run analytics,
+      advertising trackers, or third-party font/asset services on this site — everything the page
+      needs to display is served directly from our own server.</p>
+
+    <h2>How long we keep it</h2>
+    <p>We keep submissions for as long as they're an active enquiry or trial in progress. Once a
+      submission is marked resolved, enrolled, or closed, it remains on file for a period the Academy
+      sets internally, after which it's eligible for deletion. We haven't published a specific number
+      of days here because that's a decision the Academy should make deliberately — with legal input
+      if appropriate — rather than one this page should assert on its behalf.</p>
+
+    <h2>Requesting a copy, correction, or deletion</h2>
+    <p>To ask what information we hold about you, request a correction, or ask for it to be deleted,
+      contact us using the details on our <a href="{% url 'contact' %}">Contact page</a>. We'll aim to
+      respond within one business day, the same as any other enquiry.</p>
+
+    <h2>Questions about this policy</h2>
+    <p>If anything here is unclear, reach out the same way — through the
+      <a href="{% url 'contact' %}">Contact page</a>.</p>
+
+  </div>
+</section>
+
+{% endblock %}

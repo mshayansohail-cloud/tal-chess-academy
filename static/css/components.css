@@ -781,6 +781,14 @@
   color: var(--text-primary);
 }
 
+.footer__bottom a {
+  transition: color var(--duration-fast) var(--ease-out);
+}
+
+.footer__bottom a:hover {
+  color: var(--text-primary);
+}
+
 .footer__bottom {
   margin-top: var(--space-8);
   padding-top: var(--space-5);

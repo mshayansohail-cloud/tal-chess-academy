@@ -35,7 +35,12 @@ def _send(subject, template_name, context, to):
         )
         return True
     except Exception:
-        logger.exception('Failed to send email "%s" to %s', subject, to)
+        # Deliberately excludes subject/recipient — both can contain
+        # submitter-supplied PII (e.g. a student's name), and server logs
+        # typically have weaker access controls than the DB itself. The
+        # template name is enough to identify which send failed; the actual
+        # record is already saved and visible in admin.
+        logger.exception('Failed to send email (template: %s)', template_name)
         return False
 
 

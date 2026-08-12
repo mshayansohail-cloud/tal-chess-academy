@@ -23,6 +23,10 @@ def about(request):
     return render(request, "academy/about.html", {"why_us": data.WHY_US})
 
 
+def privacy(request):
+    return render(request, "academy/privacy.html")
+
+
 def programs(request):
     return render(request, "academy/programs.html", {"programs": Program.objects.filter(is_active=True)})
 

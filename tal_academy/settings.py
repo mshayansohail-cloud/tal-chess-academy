@@ -235,6 +235,17 @@ if EMAIL_HOST:
 else:
     EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 
+
+# Not a built-in Django setting — our own, read by
+# `manage.py purge_old_submissions`. Deliberately no default: we're not
+# asserting a specific retention period applies here, so the command is a
+# no-op until you explicitly decide on one and set this.
+SUBMISSION_RETENTION_DAYS = os.getenv('SUBMISSION_RETENTION_DAYS')
+if SUBMISSION_RETENTION_DAYS:
+    SUBMISSION_RETENTION_DAYS = int(SUBMISSION_RETENTION_DAYS)
+else:
+    SUBMISSION_RETENTION_DAYS = None
+
 # Django emails these addresses automatically whenever an unhandled 500
 # happens in production (via the mail_admins log handler wired up by
 # Django's own default logging config) — otherwise a real crash for a real

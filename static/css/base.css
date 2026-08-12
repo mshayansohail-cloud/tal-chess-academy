@@ -327,6 +327,43 @@ textarea {
   color: var(--text-muted);
 }
 
+/* Long-form prose pages (privacy policy, terms, etc.) — a readable line
+   length and simple vertical rhythm, reusing the same type/color tokens
+   as the rest of the site rather than introducing new ones. */
+.prose {
+  max-width: 68ch;
+}
+
+.prose h2 {
+  margin-top: var(--space-8);
+  margin-bottom: var(--space-3);
+  font-size: var(--fs-xl);
+}
+
+.prose h2:first-child {
+  margin-top: 0;
+}
+
+.prose p,
+.prose ul {
+  margin-top: var(--space-4);
+  color: var(--text-muted);
+  line-height: var(--lh-normal);
+}
+
+.prose ul {
+  padding-left: var(--space-5);
+  list-style: disc;
+}
+
+.prose li + li {
+  margin-top: var(--space-2);
+}
+
+.prose strong {
+  color: var(--text-primary);
+}
+
 @media (max-width: 640px) {
   .section {
     padding-block: var(--space-8);
