@@ -82,13 +82,6 @@ COACHES = [
     },
 ]
 
-STATS = [
-    {"value": 128, "suffix": "+", "label": "Tournament Victories"},
-    {"value": 940, "suffix": "+", "label": "Students Trained"},
-    {"value": 76, "suffix": "", "label": "Rated Players Produced"},
-    {"value": 12, "suffix": "", "label": "National Titles"},
-]
-
 EVENTS = [
     {
         "name": "Autumn Open Classical",

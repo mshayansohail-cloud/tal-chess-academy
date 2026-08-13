@@ -1,7 +1,7 @@
 # TAL Chess Academy
 
 A Django website for a chess academy: a public marketing site (home, about,
-programs, coaches, achievements, events, contact) backed by a real database —
+programs, coaches, events, FAQ, contact) backed by a real database —
 trial registrations and contact enquiries are saved to the database, staff
 manage them through Django admin, and email notifications go out
 automatically. No frontend framework or build step: vanilla CSS and vanilla
@@ -35,12 +35,15 @@ What's still placeholder, deliberately, rather than invented to look real:
   over fabricated-but-realistic-looking business data — don't invent a phone
   number or street address that *looks* real.)
 - **Most credibility content is placeholder fiction from the original build** —
-  the four coaches and their FIDE titles/ratings, the achievement stats (128
-  victories, 940 students, etc. in `academy/data.py`), the three testimonials,
-  and the event calendar are all invented. This is the single biggest thing to
+  the four coaches and their FIDE titles/ratings, the three testimonials, and
+  the event calendar are all invented. This is the single biggest thing to
   fix before launch: FIDE ratings are a public, searchable database, so
-  fabricated credentials are checkable. The `/faq/` page was deliberately
-  written using *only* claims already established elsewhere on the site, so it
+  fabricated credentials are checkable. (The homepage's Achievements section
+  and its invented stats — 128 tournament victories, 940 students trained,
+  etc. — were removed outright rather than left as placeholder, since the
+  academy has no real track record yet to report; add it back once there's
+  something real to show.) The `/faq/` page was deliberately written using
+  *only* claims already established elsewhere on the site, so it
   inherits no new fabrications — but it will need revisiting once the real
   coach/programme facts land.
 - **SMTP credentials** — `EMAIL_HOST` etc. are unset, so emails currently
@@ -153,7 +156,7 @@ Three real database models, all in `academy/models.py`:
   own simpler status workflow (New → In Progress → Resolved/Closed).
 
 **`academy/data.py` deliberately still holds plain Python data** — coach
-bios, "Why Us" points, stats, events, testimonials. These have no
+bios, "Why Us" points, events, testimonials. These have no
 submission workflow and no current admin-editing requirement, so they were
 left as code rather than promoted to models. If a future request needs
 these editable through admin too, follow the same pattern used for

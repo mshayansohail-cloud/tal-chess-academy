@@ -568,52 +568,6 @@
   }
 }
 
-/* ============ Stats ============ */
-
-.stats-row {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  border-top: 1px solid var(--border-hairline-inverse);
-}
-
-.stat {
-  padding-block: var(--space-6);
-  border-right: 1px solid var(--border-hairline-inverse);
-}
-
-.stat:last-child {
-  border-right: none;
-}
-
-.stat__value {
-  font-family: var(--font-display);
-  font-size: var(--fs-3xl);
-  color: var(--color-gold-dim);
-}
-
-.stat__label {
-  margin-top: var(--space-2);
-  font-size: var(--fs-xs);
-  letter-spacing: var(--tracking-wide);
-  text-transform: uppercase;
-  color: var(--text-inverse-muted);
-}
-
-@media (max-width: 700px) {
-  .stats-row {
-    grid-template-columns: repeat(2, 1fr);
-  }
-
-  .stat:nth-child(2) {
-    border-right: none;
-  }
-
-  .stat:nth-child(1),
-  .stat:nth-child(2) {
-    border-bottom: 1px solid var(--border-hairline-inverse);
-  }
-}
-
 /* ============ Events ============ */
 
 .event-grid {
@@ -916,37 +870,6 @@
   .coach-detail {
     grid-template-columns: 1fr;
   }
-}
-
-/* ============ Achievements page extras ============ */
-
-.milestone-list {
-  display: flex;
-  flex-direction: column;
-}
-
-.milestone {
-  display: grid;
-  grid-template-columns: 120px 1fr;
-  gap: var(--space-6);
-  padding-block: var(--space-5);
-  border-top: 1px solid var(--border-hairline-inverse);
-}
-
-.milestone-list > :last-child {
-  border-bottom: 1px solid var(--border-hairline-inverse);
-}
-
-.milestone__year {
-  font-family: var(--font-display);
-  font-size: var(--fs-lg);
-  /* At 20px this doesn't qualify for WCAG's large-text 3:1 exemption, so it
-     needs the full 4.5:1 — --color-gold-dim only reaches ~4:1 here. */
-  color: var(--color-gold-contrast);
-}
-
-.milestone__desc {
-  color: var(--text-inverse-muted);
 }
 
 /* ============ FAQ ============ */

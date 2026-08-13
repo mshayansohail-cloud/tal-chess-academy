@@ -12,7 +12,6 @@ def home(request):
         "programs": Program.objects.filter(is_active=True),
         "why_us": data.WHY_US,
         "coaches": data.COACHES,
-        "stats": data.STATS,
         "events": data.EVENTS[:3],
         "testimonials": data.TESTIMONIALS,
     }
@@ -44,10 +43,6 @@ def coach_detail(request, slug):
         if coach["slug"] == slug:
             return render(request, "academy/coach_detail.html", {"coach": coach})
     raise Http404("Coach not found")
-
-
-def achievements(request):
-    return render(request, "academy/achievements.html", {"stats": data.STATS})
 
 
 def events(request):
@@ -101,7 +96,6 @@ def llms_txt(request):
         ('about', 'About', "The academy's philosophy and teaching approach"),
         ('programs', 'Programs', 'Course offerings by skill level, from first moves to private coaching'),
         ('coaches', 'Coaches', 'FIDE-titled coaching staff'),
-        ('achievements', 'Achievements', "Students' tournament results and the academy's milestones"),
         ('events', 'Events', 'Upcoming tournaments and academy events'),
         ('faq', 'FAQ', 'Common questions about programmes, trial lessons, and level placement'),
         ('contact', 'Contact', 'Book a trial lesson or send a general enquiry'),

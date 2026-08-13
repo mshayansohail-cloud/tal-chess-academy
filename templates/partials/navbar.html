@@ -14,7 +14,6 @@
       <a href="{% url 'about' %}"{% if request.resolver_match.url_name == 'about' %} class="is-active"{% endif %}>About</a>
       <a href="{% url 'programs' %}"{% if request.resolver_match.url_name == 'programs' %} class="is-active"{% endif %}>Programs</a>
       <a href="{% url 'coaches' %}"{% if request.resolver_match.url_name == 'coaches' or request.resolver_match.url_name == 'coach_detail' %} class="is-active"{% endif %}>Coaches</a>
-      <a href="{% url 'achievements' %}"{% if request.resolver_match.url_name == 'achievements' %} class="is-active"{% endif %}>Achievements</a>
       <a href="{% url 'events' %}"{% if request.resolver_match.url_name == 'events' %} class="is-active"{% endif %}>Events</a>
       <a href="{% url 'contact' %}"{% if request.resolver_match.url_name == 'contact' %} class="is-active"{% endif %}>Contact</a>
       <a href="{% url 'contact' %}" class="btn btn-primary">Book a Trial</a>
