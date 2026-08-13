@@ -792,6 +792,10 @@
 }
 
 .footer__bottom a {
+  /* Matches .footer__links a — standalone link, so it needs the 24px
+     minimum target height that inline prose links are exempt from. */
+  display: inline-block;
+  padding-block: 3px;
   transition: color var(--duration-fast) var(--ease-out);
 }
 
@@ -840,6 +844,18 @@
   max-width: 52ch;
   font-size: var(--fs-lg);
   color: var(--text-muted);
+}
+
+/* Base resets a { color: inherit } site-wide, so inline links in prose-style
+   copy need to be made visibly distinct or they read as plain text. */
+.page-header__desc a {
+  color: var(--color-gold);
+  border-bottom: 1px solid var(--border-hairline);
+  transition: border-color var(--duration-fast) var(--ease-out);
+}
+
+.page-header__desc a:hover {
+  border-bottom-color: var(--color-gold);
 }
 
 .breadcrumb {
@@ -933,6 +949,77 @@
   color: var(--text-inverse-muted);
 }
 
+/* ============ FAQ ============ */
+
+/* Native <details>/<summary> — accordion behaviour, keyboard support and
+   screen-reader semantics all come free, with no JS to load or maintain. */
+
+.faq-list {
+  max-width: 70ch;
+  border-top: 1px solid var(--border-hairline);
+}
+
+.faq-item {
+  border-bottom: 1px solid var(--border-hairline);
+}
+
+.faq-item summary {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-5);
+  padding-block: var(--space-5);
+  font-family: var(--font-display);
+  font-size: var(--fs-lg);
+  line-height: var(--lh-snug);
+  cursor: pointer;
+  /* Both are needed: list-style is the standard way to drop the disclosure
+     triangle, the -webkit- pseudo-element covers older WebKit. */
+  list-style: none;
+  transition: color var(--duration-fast) var(--ease-out);
+}
+
+.faq-item summary::-webkit-details-marker {
+  display: none;
+}
+
+.faq-item summary:hover {
+  color: var(--color-gold);
+}
+
+.faq-item summary::after {
+  content: "+";
+  margin-left: auto;
+  flex-shrink: 0;
+  font-family: var(--font-body);
+  color: var(--color-gold);
+}
+
+.faq-item[open] summary::after {
+  content: "\2212"; /* minus sign — visually matched to the "+" */
+}
+
+.faq-item__answer {
+  padding-bottom: var(--space-5);
+  max-width: 62ch;
+  color: var(--text-muted);
+}
+
+.faq-item__answer a {
+  color: var(--color-gold);
+  border-bottom: 1px solid var(--border-hairline);
+  transition: border-color var(--duration-fast) var(--ease-out);
+}
+
+.faq-item__answer a:hover {
+  border-bottom-color: var(--color-gold);
+}
+
+@media (max-width: 560px) {
+  .faq-item summary {
+    font-size: var(--fs-md);
+  }
+}
+
 /* ============ Contact ============ */
 
 .contact-layout {
@@ -977,6 +1064,22 @@
   color: var(--color-gold);
   font-family: var(--font-display);
   margin-right: var(--space-2);
+}
+
+.contact-expect__more {
+  margin-top: var(--space-5);
+  font-size: var(--fs-sm);
+  color: var(--text-muted);
+}
+
+.contact-expect__more a {
+  color: var(--color-gold);
+  border-bottom: 1px solid var(--border-hairline);
+  transition: border-color var(--duration-fast) var(--ease-out);
+}
+
+.contact-expect__more a:hover {
+  border-bottom-color: var(--color-gold);
 }
 
 .form-row {

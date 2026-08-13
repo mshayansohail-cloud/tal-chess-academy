@@ -20,6 +20,7 @@ urlpatterns = [
     path('', views.home, name='home'),
     path('about/', views.about, name='about'),
     path('privacy/', views.privacy, name='privacy'),
+    path('faq/', views.faq, name='faq'),
     path('programs/', views.programs, name='programs'),
     path('coaches/', views.coaches, name='coaches'),
     path('coaches/<slug:slug>/', views.coach_detail, name='coach_detail'),

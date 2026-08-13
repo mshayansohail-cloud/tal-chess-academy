@@ -364,6 +364,18 @@ textarea {
   color: var(--text-primary);
 }
 
+/* Base resets a { color: inherit } site-wide, so inline links inside prose
+   are indistinguishable from body text unless given their own treatment. */
+.prose a {
+  color: var(--color-gold);
+  border-bottom: 1px solid var(--border-hairline);
+  transition: border-color var(--duration-fast) var(--ease-out);
+}
+
+.prose a:hover {
+  border-bottom-color: var(--color-gold);
+}
+
 @media (max-width: 640px) {
   .section {
     padding-block: var(--space-8);

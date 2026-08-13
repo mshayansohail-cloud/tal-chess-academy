@@ -1,0 +1,115 @@
+{% extends "base.html" %}
+
+{% block title %}Frequently Asked Questions — TAL Chess Academy{% endblock %}
+{% block meta_description %}Common questions about training at TAL Chess Academy in Karachi — who our programmes are for, what a trial lesson involves, and how students are placed at the right level.{% endblock %}
+{% block og_title %}Frequently Asked Questions — TAL Chess Academy{% endblock %}
+{% block og_description %}Common questions about training at TAL Chess Academy in Karachi — who our programmes are for, what a trial lesson involves, and how students are placed at the right level.{% endblock %}
+
+{% block content %}
+
+<header class="page-header">
+  <div class="container">
+    <p class="breadcrumb"><a href="{% url 'home' %}">Home</a> / FAQ</p>
+    <h1 class="page-header__title">Questions, answered.</h1>
+    <p class="page-header__desc">
+      The things people usually want to know before they book. If yours isn't here,
+      <a href="{% url 'contact' %}">just ask us</a> — we reply within one business day.
+    </p>
+  </div>
+</header>
+
+<section class="section">
+  <div class="container">
+    <div class="faq-list" data-reveal>
+
+      <details class="faq-item">
+        <summary>I've never played chess before. Can I still join?</summary>
+        <div class="faq-item__answer">
+          <p>Yes. The Junior Program and the Beginner programme both start from the rules of the board —
+            no prior experience assumed, and no expectation that you arrive knowing anything. Our trial
+            form has "Never played" as an option precisely because that's where a lot of our students start.</p>
+        </div>
+      </details>
+
+      <details class="faq-item">
+        <summary>Do you teach adults, or only children?</summary>
+        <div class="faq-item__answer">
+          <p>Both. We train juniors and adults alike, from a first lesson through a first rated tournament
+            and beyond. The Junior Program is age-specific (6–11); every other programme is organised by
+            playing strength rather than age, so an adult beginner and a teenage beginner can sit in the
+            same room without either being out of place.</p>
+        </div>
+      </details>
+
+      <details class="faq-item">
+        <summary>How do I know which programme is right for me?</summary>
+        <div class="faq-item__answer">
+          <p>You don't need to work it out in advance — that's what the trial is for. Book a trial lesson
+            and we'll place you at the right level after a short assessment across the board. If you'd
+            like to make an informed guess first, our programmes are banded by rating: Intermediate is
+            aimed at 1200–1800, Advanced at 1800+, and Beginner at anyone new to competitive play.</p>
+        </div>
+      </details>
+
+      <details class="faq-item">
+        <summary>What actually happens at a trial lesson?</summary>
+        <div class="faq-item__answer">
+          <p>Three steps. You tell us about your (or your child's) chess experience and pick a programme
+            on the enquiry form. We reply within one business day to schedule a time. Then you sit across
+            the board with a coach for a short assessment, and leave with a clear sense of which programme
+            fits — whether or not you decide to continue with us.</p>
+        </div>
+      </details>
+
+      <details class="faq-item">
+        <summary>How long does a programme run?</summary>
+        <div class="faq-item__answer">
+          <p>The Junior, Beginner and Intermediate programmes run in 12-week terms. Advanced runs in
+            12-week terms on an ongoing basis, since preparation at that level doesn't have a natural
+            finish line. Private Coaching is flexible and booked per session rather than by term.</p>
+        </div>
+      </details>
+
+      <details class="faq-item">
+        <summary>Are lessons taught in groups or one-to-one?</summary>
+        <div class="faq-item__answer">
+          <p>Our four levelled programmes are taught in small groups — deliberately small, so that game
+            reviews are detailed and individual weaknesses actually get addressed rather than averaged
+            away. If you'd prefer training built entirely around your own games, Private Coaching is
+            one-to-one with a coach of your choosing.</p>
+        </div>
+      </details>
+
+      <details class="faq-item">
+        <summary>Will I get to play competitively?</summary>
+        <div class="faq-item__answer">
+          <p>Yes. We run internal tournaments regularly so there's real competitive pressure between
+            external events, and students train under classical time controls before they ever sit a
+            rated game. Our <a href="{% url 'events' %}">events calendar</a> lists what's coming up.</p>
+        </div>
+      </details>
+
+      <details class="faq-item">
+        <summary>Where are you based, and when are you open?</summary>
+        <div class="faq-item__answer">
+          <p>We're based in Karachi, at Academy Hall, Downtown Centre. Our hours are Monday to Saturday,
+            9am to 7pm. Full contact details are on our <a href="{% url 'contact' %}">contact page</a>.</p>
+        </div>
+      </details>
+
+    </div>
+  </div>
+</section>
+
+<section class="section section--tight final-cta">
+  <div class="container">
+    <h2 class="final-cta__title">Still deciding?</h2>
+    <p class="final-cta__desc">Book a trial and find out across the board — it's the fastest way to know.</p>
+    <div class="final-cta__actions">
+      <a href="{% url 'contact' %}" class="btn btn-primary">Book a Trial</a>
+      <a href="{% url 'programs' %}" class="btn btn-ghost">Browse Programs</a>
+    </div>
+  </div>
+</section>
+
+{% endblock %}

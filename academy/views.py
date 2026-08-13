@@ -27,6 +27,10 @@ def privacy(request):
     return render(request, "academy/privacy.html")
 
 
+def faq(request):
+    return render(request, "academy/faq.html")
+
+
 def programs(request):
     return render(request, "academy/programs.html", {"programs": Program.objects.filter(is_active=True)})
 
@@ -99,6 +103,7 @@ def llms_txt(request):
         ('coaches', 'Coaches', 'FIDE-titled coaching staff'),
         ('achievements', 'Achievements', "Students' tournament results and the academy's milestones"),
         ('events', 'Events', 'Upcoming tournaments and academy events'),
+        ('faq', 'FAQ', 'Common questions about programmes, trial lessons, and level placement'),
         ('contact', 'Contact', 'Book a trial lesson or send a general enquiry'),
     ]
     lines = [

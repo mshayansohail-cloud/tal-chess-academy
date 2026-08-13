@@ -27,11 +27,22 @@ What's still placeholder, deliberately, rather than invented to look real:
 
 - **Contact details** in `templates/partials/footer.html` and
   `templates/academy/contact.html` — email (`contact@yourdomain.com`), phone
-  (`+1 (555) 000-0000`), and address ("Academy Hall, Downtown Centre") are
-  all obvious placeholders. Replace with the real business's actual details
-  before going live. (A past product decision explicitly chose obvious
-  placeholders over fabricated-but-realistic-looking business data — don't
-  invent a phone number or address that *looks* real.)
+  (`+1 (555) 000-0000`), and the street portion of the address ("Academy Hall,
+  Downtown Centre") are all obvious placeholders. **The city, Karachi, is
+  real** and was set deliberately — don't strip it, it's the site's only local
+  SEO signal. Replace the rest with the real business's actual details before
+  going live. (A past product decision explicitly chose obvious placeholders
+  over fabricated-but-realistic-looking business data — don't invent a phone
+  number or street address that *looks* real.)
+- **Most credibility content is placeholder fiction from the original build** —
+  the four coaches and their FIDE titles/ratings, the achievement stats (128
+  victories, 940 students, etc. in `academy/data.py`), the three testimonials,
+  and the event calendar are all invented. This is the single biggest thing to
+  fix before launch: FIDE ratings are a public, searchable database, so
+  fabricated credentials are checkable. The `/faq/` page was deliberately
+  written using *only* claims already established elsewhere on the site, so it
+  inherits no new fabrications — but it will need revisiting once the real
+  coach/programme facts land.
 - **SMTP credentials** — `EMAIL_HOST` etc. are unset, so emails currently
   print to the console instead of sending. Needs real credentials before
   registration/contact notifications actually reach anyone (see "Email"
@@ -221,6 +232,17 @@ these editable through admin too, follow the same pattern used for
   build their links with `request.build_absolute_uri()`, so they always
   reflect whatever host actually served the request — no hardcoded domain
   to keep in sync with `ALLOWED_HOSTS`.
+- **`/faq/` uses native `<details>`/`<summary>`**, not a JS accordion —
+  keyboard support, focus handling and screen-reader semantics come free, and
+  it adds no JavaScript to the page. If you restyle it, keep both
+  `list-style: none` and the `::-webkit-details-marker` rule: they suppress
+  the default disclosure triangle in different browsers.
+- **Inline links need explicit styling.** `base.css` resets `a { color:
+  inherit; text-decoration: none }` site-wide, which is right for nav/cards
+  but makes inline links inside prose *invisible* — indistinguishable from
+  body text. `.prose a`, `.page-header__desc a`, `.faq-item__answer a` and
+  `.contact-expect__more a` each opt back in to gold + a hairline underline.
+  Any new prose region needs the same treatment.
 - **Django template gotchas** hit and worked around in this codebase:
   `{# #}` comments don't support multi-line content (they leak into
   rendered HTML if you try) — use `{% comment %}...{% endcomment %}`
