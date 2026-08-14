@@ -26,14 +26,15 @@ below) so the project isn't tied to one host. There is no live URL right now.
 What's still placeholder, deliberately, rather than invented to look real:
 
 - **Contact details** in `templates/partials/footer.html` and
-  `templates/academy/contact.html` — email (`contact@yourdomain.com`), phone
-  (`+1 (555) 000-0000`), and the street portion of the address ("Academy Hall,
-  Downtown Centre") are all obvious placeholders. **The city, Karachi, is
-  real** and was set deliberately — don't strip it, it's the site's only local
-  SEO signal. Replace the rest with the real business's actual details before
-  going live. (A past product decision explicitly chose obvious placeholders
-  over fabricated-but-realistic-looking business data — don't invent a phone
-  number or street address that *looks* real.)
+  `templates/academy/contact.html` — email (`contact@yourdomain.com`) and the
+  street portion of the address ("Academy Hall, Downtown Centre") are still
+  obvious placeholders. **The city (Karachi) and phone number
+  (+92 348 3186131) are both real** — don't strip either; the phone number
+  also feeds the `LocalBusiness` structured data in `base.html` (see below).
+  Replace the email and street address with the real business's actual
+  details before going live. (A past product decision explicitly chose
+  obvious placeholders over fabricated-but-realistic-looking business data —
+  don't invent a street address that *looks* real.)
 - **Most credibility content is placeholder fiction from the original build** —
   the four coaches and their FIDE titles/ratings, the three testimonials, and
   the event calendar are all invented. This is the single biggest thing to
@@ -178,6 +179,18 @@ these editable through admin too, follow the same pattern used for
   admin login attempts for 1 hour. All of this came out of an explicit
   security audit earlier in the project — see git history for the full
   original findings if you need the reasoning behind any specific setting.
+- **`CACHES` uses `DatabaseCache`, not Django's `LocMemCache` default —
+  deliberately.** The throttles above are only as real as the counter
+  backing them: `LocMemCache` is per-*process*, so with more than one
+  gunicorn worker each worker keeps its own separate count and the real
+  limit silently becomes `workers x configured rate`, resetting on every
+  restart. `DatabaseCache` is shared across every worker since they all hit
+  the same database — no new infrastructure (no Redis) needed at this
+  scale. The table itself is created by migration
+  `0004_cache_table.py` (via `call_command('createcachetable', ...)` inside
+  `RunPython`, so it generates correct DDL for whatever database backend is
+  actually configured rather than hardcoded SQL) — `python manage.py
+  migrate` is still the only deploy step needed, nothing extra to remember.
 - **The two public API views (`RegistrationCreateAPIView`,
   `ContactCreateAPIView`) explicitly set `authentication_classes = []`.**
   This is load-bearing, not incidental: `SessionAuthentication` enforces
@@ -234,7 +247,12 @@ these editable through admin too, follow the same pattern used for
   same public page set as the sitemap. Both `robots.txt` and `llms.txt`
   build their links with `request.build_absolute_uri()`, so they always
   reflect whatever host actually served the request — no hardcoded domain
-  to keep in sync with `ALLOWED_HOSTS`.
+  to keep in sync with `ALLOWED_HOSTS`. `base.html` also carries a
+  `LocalBusiness`/`EducationalOrganization` JSON-LD block — deliberately
+  includes only fields with real values (name, description, phone, city);
+  `streetAddress`/`email` are left out entirely rather than filled with the
+  placeholders those fields still hold elsewhere on the site, since
+  structured data is a machine-readable factual claim, not display copy.
 - **`/faq/` uses native `<details>`/`<summary>`**, not a JS accordion —
   keyboard support, focus handling and screen-reader semantics come free, and
   it adds no JavaScript to the page. If you restyle it, keep both

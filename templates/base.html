@@ -20,6 +20,30 @@
   {% endcomment %}
   <meta name="twitter:card" content="summary">
 
+  {% comment %}
+    LocalBusiness + EducationalOrganization: only fields with real values
+    are included. streetAddress and email are deliberately left out — both
+    are still placeholders (see README "Current status") and structured
+    data is a machine-readable factual claim, not display copy, so a
+    placeholder doesn't belong here the way it can in visible text pending
+    a real value.
+  {% endcomment %}
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": ["LocalBusiness", "EducationalOrganization"],
+    "name": "TAL Chess Academy",
+    "description": "TAL Chess Academy trains players in Karachi from first moves to tournament mastery, led by FIDE-titled coaches in a structured, competitive environment.",
+    "url": "{{ request.scheme }}://{{ request.get_host }}/",
+    "telephone": "+923483186131",
+    "address": {
+      "@type": "PostalAddress",
+      "addressLocality": "Karachi",
+      "addressCountry": "PK"
+    }
+  }
+  </script>
+
   <link rel="icon" type="image/svg+xml" href="{% static 'favicon.svg' %}">
 
   <link rel="stylesheet" href="{% static 'css/tokens.css' %}">

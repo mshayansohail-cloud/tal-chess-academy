@@ -256,6 +256,25 @@ if ACADEMY_NOTIFICATION_EMAIL:
 SERVER_EMAIL = DEFAULT_FROM_EMAIL
 
 
+# Cache
+# https://docs.djangoproject.com/en/6.1/topics/cache/
+# Backs DRF's throttling below. Django's default (LocMemCache) is per
+# *process*, not shared — with more than one gunicorn worker, each worker
+# keeps its own separate throttle count, so the real-world limit becomes
+# workers x configured rate instead of the configured rate, and resets on
+# every restart/deploy. DatabaseCache is shared across every worker (they
+# all hit the same DB) without adding new infrastructure (no Redis) — the
+# table itself is created by migration 0004_cache_table, not a manual
+# deploy step.
+
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.db.DatabaseCache',
+        'LOCATION': 'django_cache',
+    }
+}
+
+
 # Django REST Framework
 # https://www.django-rest-framework.org/api-guide/settings/
 # Public write endpoints (registrations, contact) are rate-limited per IP to
