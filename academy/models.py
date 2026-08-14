@@ -28,6 +28,10 @@ class Program(models.Model):
     name = models.CharField(max_length=100)
     slug = models.SlugField(max_length=110, unique=True)
     description = models.TextField()
+    highlights = models.JSONField(
+        default=list, blank=True,
+        help_text='Short "what you\'ll learn" bullet points, shown collapsed on the programme row.',
+    )
     skill_level = models.CharField(max_length=20, choices=SkillLevel.choices)
     age_group = models.CharField(max_length=60, help_text='e.g. "Ages 6–11" or "1200+ rated"')
     duration = models.CharField(max_length=60, blank=True, help_text='e.g. "12-week term"')

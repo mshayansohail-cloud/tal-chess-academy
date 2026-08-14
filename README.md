@@ -150,7 +150,10 @@ Three real database models, all in `academy/models.py`:
   `is_active` (hide without deleting) and `display_order`. This used to be
   a hardcoded Python list; it was promoted to a real model so staff can
   edit programs without a code deploy. The original five are seeded by
-  migration `0002_seed_initial_programs.py`.
+  migration `0002_seed_initial_programs.py`. `highlights` is a `JSONField`
+  list of short "what you'll learn" bullets, shown as a collapsed
+  `<details>` on the programme row (`partials/program_row.html`) — kept
+  short deliberately, this is not a place for a full syllabus.
 - **`TrialRegistration`** — a "Book a Trial" submission. Write-only from the
   public API (no GET/list endpoint) — staff only ever read these through
   Django admin. Has a `status` workflow: New → Contacted → Trial Scheduled

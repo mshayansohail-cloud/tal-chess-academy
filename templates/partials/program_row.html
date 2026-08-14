@@ -5,6 +5,16 @@
     <span class="program-row__age">{{ program.age_group }}{% if program.duration %} · {{ program.duration }}{% endif %}</span>
     <h3 class="program-row__name">{{ program.name }}</h3>
     <p class="program-row__summary">{{ program.description }}</p>
+    {% if program.highlights %}
+      <details class="program-row__highlights">
+        <summary>What you'll learn</summary>
+        <ul class="program-row__highlights-list">
+          {% for point in program.highlights %}
+            <li>{{ point }}</li>
+          {% endfor %}
+        </ul>
+      </details>
+    {% endif %}
   </div>
   <a href="{% url 'contact' %}?program={{ program.slug }}" class="btn-text">
     {{ program.cta_label }}

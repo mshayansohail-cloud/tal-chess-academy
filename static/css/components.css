@@ -394,6 +394,56 @@
   color: var(--text-muted);
 }
 
+.program-row__highlights {
+  margin-top: var(--space-3);
+}
+
+.program-row__highlights summary {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: var(--fs-2xs);
+  letter-spacing: var(--tracking-wide);
+  text-transform: uppercase;
+  color: var(--color-gold);
+  cursor: pointer;
+  list-style: none;
+  transition: color var(--duration-fast) var(--ease-out);
+}
+
+.program-row__highlights summary::-webkit-details-marker {
+  display: none;
+}
+
+.program-row__highlights summary:hover {
+  color: var(--color-gold-bright);
+}
+
+.program-row__highlights summary::after {
+  content: "+";
+  font-family: var(--font-body);
+}
+
+.program-row__highlights[open] summary::after {
+  content: "\2212"; /* minus sign — visually matched to the "+" */
+}
+
+.program-row__highlights-list {
+  margin-top: var(--space-3);
+  padding-left: var(--space-5);
+  max-width: 52ch;
+  color: var(--text-muted);
+  font-size: var(--fs-sm);
+}
+
+.program-row__highlights-list li {
+  margin-bottom: var(--space-2);
+}
+
+.program-row__highlights-list li:last-child {
+  margin-bottom: 0;
+}
+
 @media (max-width: 700px) {
   .program-row {
     grid-template-columns: 1fr;

@@ -11,6 +11,10 @@ class ProgramAdmin(admin.ModelAdmin):
     search_fields = ('name', 'description', 'age_group')
     prepopulated_fields = {'slug': ('name',)}
     ordering = ('display_order', 'name')
+    fields = (
+        'name', 'slug', 'description', 'highlights', 'skill_level', 'age_group', 'duration',
+        'icon', 'cta_label', 'is_active', 'display_order',
+    )
 
 
 class SubmissionAdminBase(admin.ModelAdmin):
