@@ -13,7 +13,6 @@ def home(request):
         "why_us": data.WHY_US,
         "coaches": data.COACHES,
         "events": data.EVENTS[:3],
-        "testimonials": data.TESTIMONIALS,
     }
     return render(request, "academy/home.html", context)
 

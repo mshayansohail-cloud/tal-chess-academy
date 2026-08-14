@@ -36,15 +36,17 @@ What's still placeholder, deliberately, rather than invented to look real:
   obvious placeholders over fabricated-but-realistic-looking business data —
   don't invent a street address that *looks* real.)
 - **Most credibility content is placeholder fiction from the original build** —
-  the four coaches and their FIDE titles/ratings, the three testimonials, and
-  the event calendar are all invented. This is the single biggest thing to
-  fix before launch: FIDE ratings are a public, searchable database, so
-  fabricated credentials are checkable. (The homepage's Achievements section
-  and its invented stats — 128 tournament victories, 940 students trained,
-  etc. — were removed outright rather than left as placeholder, since the
-  academy has no real track record yet to report; add it back once there's
-  something real to show.) The `/faq/` page was deliberately written using
-  *only* claims already established elsewhere on the site, so it
+  the four coaches and their FIDE titles/ratings and the event calendar are
+  invented. This is the single biggest thing to fix before launch: FIDE
+  ratings are a public, searchable database, so fabricated credentials are
+  checkable. (The homepage's Achievements section and its invented stats —
+  128 tournament victories, 940 students trained, etc. — were removed
+  outright rather than left as placeholder, since the academy has no real
+  track record yet to report; the Testimonials section — three fabricated
+  student quotes — was removed the same way and for the same reason. Add
+  either back once there's something real to show.) The `/faq/` page was
+  deliberately written using *only*
+  claims already established elsewhere on the site, so it
   inherits no new fabrications — but it will need revisiting once the real
   coach/programme facts land.
 - **SMTP credentials** — `EMAIL_HOST` etc. are unset, so emails currently
@@ -157,7 +159,7 @@ Three real database models, all in `academy/models.py`:
   own simpler status workflow (New → In Progress → Resolved/Closed).
 
 **`academy/data.py` deliberately still holds plain Python data** — coach
-bios, "Why Us" points, events, testimonials. These have no
+bios, "Why Us" points, events. These have no
 submission workflow and no current admin-editing requirement, so they were
 left as code rather than promoted to models. If a future request needs
 these editable through admin too, follow the same pattern used for

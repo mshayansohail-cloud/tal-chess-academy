@@ -105,24 +105,3 @@ EVENTS = [
         "description": "An invitation-only classical event for Advanced and Private Coaching students preparing for national play.",
     },
 ]
-
-TESTIMONIALS = [
-    {
-        "quote": "My son went from knowing how the pieces move to winning his club's under-12 championship in "
-        "eighteen months. The coaches noticed things about his game I never would have.",
-        "name": "Priya Nathan",
-        "role": "Parent, Junior Programme",
-    },
-    {
-        "quote": "I plateaued at 1500 for two years before joining. Daniel rebuilt my middlegame understanding "
-        "from scratch. I crossed 1800 this spring.",
-        "name": "Marcus Webb",
-        "role": "Intermediate Programme",
-    },
-    {
-        "quote": "The private coaching is genuinely built around your own games. No generic curriculum — "
-        "every session started with something I'd actually played.",
-        "name": "Aisha Rahman",
-        "role": "Private Coaching",
-    },
-]
