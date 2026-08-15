@@ -713,6 +713,15 @@
     scroll-snap-type: none;
   }
 
+  /* Mandatory snap pulls the track back to the nearest card on every frame,
+     which fights the continuous auto-scroll. Suspended while the carousel is
+     driving itself; main.js restores it the moment the visitor takes over,
+     so their own swipes still settle neatly on a card. */
+  #why-us .why-grid.is-autoscrolling,
+  #coaches .coach-grid.is-autoscrolling {
+    scroll-snap-type: none;
+  }
+
   .carousel-dots {
     display: flex;
     justify-content: center;

@@ -109,14 +109,23 @@
     if (!track || !dots.length || !cards.length) return;
 
     // The scrollLeft each card needs in order to sit at the track's start
-    // edge. Measured live rather than cached: card widths are percentages
-    // and --content-pad is a clamp(), so both change with the viewport.
+    // edge. The measurement cancels out the current scroll position, so the
+    // result doesn't change as the track scrolls and can be cached — worth
+    // doing, because the continuous auto-scroll below fires a scroll event
+    // every frame, and re-measuring every card each time would force a
+    // synchronous layout on every one of them. Invalidated on resize, where
+    // it genuinely does change: card widths are percentages and
+    // --content-pad is a clamp().
+    var cachedTargets = null;
+
     function scrollTargets() {
+      if (cachedTargets) return cachedTargets;
       var trackLeft = track.getBoundingClientRect().left;
       var padLeft = parseFloat(window.getComputedStyle(track).paddingLeft) || 0;
-      return cards.map(function (card) {
+      cachedTargets = cards.map(function (card) {
         return card.getBoundingClientRect().left - trackLeft + track.scrollLeft - padLeft;
       });
+      return cachedTargets;
     }
 
     function setActive(index) {
@@ -174,9 +183,16 @@
       { passive: true }
     );
 
-    // Card widths are percentage-based, so a resize or rotation moves
-    // every scroll target — re-resolve which dot is current afterwards.
-    window.addEventListener("resize", syncActive, { passive: true });
+    // Card widths are percentage-based, so a resize or rotation moves every
+    // scroll target — drop the cache and re-resolve which dot is current.
+    window.addEventListener(
+      "resize",
+      function () {
+        cachedTargets = null;
+        syncActive();
+      },
+      { passive: true }
+    );
 
     // Drag-to-scroll for mouse/trackpad. Touch pointers are skipped on
     // purpose: the browser already scrolls the track natively, and driving
@@ -221,36 +237,45 @@
     track.addEventListener("pointerup", endDrag);
     track.addEventListener("pointercancel", endDrag);
 
-    /* Auto-advance.
+    /* Continuous auto-scroll.
+
+       The track glides at a constant speed rather than jumping card to
+       card, so the time spent crossing a card is proportional to its width
+       — pacing follows the space, and cards of different widths never feel
+       rushed or laboured relative to one another.
 
        Deliberately cautious, because a carousel that moves on its own is
        easy to get wrong: it never starts under prefers-reduced-motion, it
-       only runs while the section is actually on screen and the tab is
-       visible, it pauses on hover and while anything inside it has focus,
-       and — most importantly — the first genuine interaction stops it for
-       good. Once someone is driving the carousel themselves, yanking it out
-       from under them mid-read is hostile.
+       runs only while the cards are on screen and the tab is visible, it
+       pauses on hover and while anything inside it has focus, and the first
+       genuine interaction stops it for good. Once someone is driving the
+       carousel themselves, taking it back mid-read is hostile.
 
        That last behaviour is also what satisfies WCAG 2.2.2 (Pause, Stop,
        Hide): swiping, dragging, tapping a dot, or moving the track with the
        wheel or arrow keys all halt the motion permanently. */
-    var AUTO_ADVANCE_MS = 5000;
-    var autoTimer = null;
+    var AUTO_SCROLL_PX_PER_SEC = 42;
+    var END_PAUSE_MS = 1100;
+
     var autoStopped = reduceMotion; // reduced motion: never starts at all
+    var rafId = null;
+    var lastFrameAt = 0;
+    var scrollDirection = 1;
+    var resumeAt = 0;
+    var lastAutoScrollLeft = track.scrollLeft;
     var pausedByHover = false;
     var pausedByFocus = false;
     // Defaults to on-screen so that if the observer below never reports (or
-    // isn't supported), the carousel still advances. Failing the other way
+    // isn't supported), the carousel still moves. Failing the other way
     // would silently disable the whole feature.
     var offScreen = false;
-    var programmaticUntil = 0;
 
     function carouselIsActive() {
       // Above 900px both tracks are plain CSS grids with nothing to scroll.
       return track.scrollWidth > track.clientWidth + 1;
     }
 
-    function mayAdvance() {
+    function mayScroll() {
       return (
         !autoStopped &&
         !pausedByHover &&
@@ -261,70 +286,112 @@
       );
     }
 
-    function advance() {
-      if (!mayAdvance()) return;
-      var targets = scrollTargets();
-      var current = track.scrollLeft;
-      var maxScroll = track.scrollWidth - track.clientWidth;
-      var next = 0;
-      // At the end, wrap to the first card. Checked explicitly because the
-      // last card can never reach the start edge, so its scroll target sits
-      // beyond maxScroll and would otherwise leave this stuck on the end.
-      if (current < maxScroll - 2) {
-        for (var i = 0; i < targets.length; i++) {
-          if (targets[i] > current + 1) {
-            next = i;
-            break;
-          }
-        }
+    function step(now) {
+      if (!mayScroll()) {
+        // Let the loop go idle rather than burning a callback every frame;
+        // whatever un-pauses it calls startScrolling() again.
+        rafId = null;
+        lastFrameAt = 0;
+        return;
       }
-      // Mark the scroll this is about to cause as ours, so the handler below
-      // doesn't mistake the carousel's own movement for the visitor's.
-      programmaticUntil = Date.now() + 1000;
-      track.scrollTo({ left: targets[next], behavior: "smooth" });
+      rafId = window.requestAnimationFrame(step);
+
+      // If the track has moved since the last frame by anything other than
+      // this loop, the visitor is driving — hand it over for good. Checked
+      // here rather than in a scroll listener because scroll events fire
+      // asynchronously: by the time one arrived, the next frame had already
+      // moved the track and overwritten the reference value, so the
+      // divergence went unnoticed and the carousel kept gliding.
+      var current = track.scrollLeft;
+      if (Math.abs(current - lastAutoScrollLeft) > 4) {
+        stopAuto();
+        return;
+      }
+
+      if (!lastFrameAt) lastFrameAt = now;
+      // Clamped so a long gap (background tab, slow frame) can't teleport
+      // the track forward in a single jump.
+      var elapsed = Math.min(now - lastFrameAt, 100);
+      lastFrameAt = now;
+
+      if (now < resumeAt) return;
+
+      var maxScroll = track.scrollWidth - track.clientWidth;
+      if (maxScroll <= 0) return;
+
+      var next = current + (AUTO_SCROLL_PX_PER_SEC * elapsed) / 1000 * scrollDirection;
+
+      // Reverse at each end and hold briefly. The alternative — snapping
+      // back to the start — needs the cards duplicated in the DOM to look
+      // seamless, which this deliberately avoids.
+      if (next >= maxScroll) {
+        next = maxScroll;
+        scrollDirection = -1;
+        resumeAt = now + END_PAUSE_MS;
+      } else if (next <= 0) {
+        next = 0;
+        scrollDirection = 1;
+        resumeAt = now + END_PAUSE_MS;
+      }
+
+      track.scrollLeft = next;
+      // Read back rather than trusting `next`: browsers round scrollLeft, and
+      // comparing a rounded value against an unrounded one on the next frame
+      // would look like the visitor had nudged the track.
+      lastAutoScrollLeft = track.scrollLeft;
+    }
+
+    function startScrolling() {
+      if (autoStopped || rafId !== null) return;
+      lastFrameAt = 0;
+      rafId = window.requestAnimationFrame(step);
     }
 
     function stopAuto() {
       autoStopped = true;
-      if (autoTimer) {
-        window.clearInterval(autoTimer);
-        autoTimer = null;
+      if (rafId !== null) {
+        window.cancelAnimationFrame(rafId);
+        rafId = null;
       }
+      // Hand snapping back to the browser now that the visitor is driving.
+      track.classList.remove("is-autoscrolling");
     }
 
     if (!autoStopped) {
-      autoTimer = window.setInterval(advance, AUTO_ADVANCE_MS);
+      // Mandatory scroll-snap fights a continuous scroll — the browser keeps
+      // pulling the track back to the nearest snap point. Suspended while the
+      // carousel drives itself, and restored the moment the visitor takes over
+      // so their swipes still settle neatly on a card.
+      track.classList.add("is-autoscrolling");
 
       // Hover pause is for pointing devices only. Touch screens fire
       // synthetic mouseenter without a reliable matching mouseleave, which
       // would leave the carousel paused for good after a single tap.
       if (window.matchMedia("(hover: hover)").matches) {
         track.addEventListener("mouseenter", function () { pausedByHover = true; });
-        track.addEventListener("mouseleave", function () { pausedByHover = false; });
+        track.addEventListener("mouseleave", function () {
+          pausedByHover = false;
+          startScrolling();
+        });
       }
       track.addEventListener("focusin", function () { pausedByFocus = true; });
-      track.addEventListener("focusout", function () { pausedByFocus = false; });
+      track.addEventListener("focusout", function () {
+        pausedByFocus = false;
+        startScrolling();
+      });
+      document.addEventListener("visibilitychange", startScrolling);
 
-      // The visitor taking the carousel over ends the automatic motion for
-      // good. Detected from the track's own scroll position rather than from
-      // raw input events: a horizontal scroll this code didn't initiate can
-      // only have come from a swipe, drag, wheel, arrow key or scrollbar.
-      // Listening for touchstart instead (the previous approach) was wrong —
-      // it fired when a finger merely landed on a card to scroll the *page*
-      // vertically, killing auto-advance almost immediately on mobile.
-      track.addEventListener(
-        "scroll",
-        function () {
-          if (Date.now() > programmaticUntil) stopAuto();
-        },
-        { passive: true }
-      );
+      // Takeover is detected inside step() above, by comparing the track's
+      // position against the last value this loop set. Raw input events are
+      // the wrong signal — listening for touchstart (an earlier attempt)
+      // fired when a finger merely landed on a card to scroll the *page*
+      // vertically, killing the motion almost immediately on mobile.
       dots.forEach(function (dot) {
         dot.addEventListener("click", stopAuto);
       });
 
       // Only run while the cards are actually in view, so they aren't
-      // silently cycling past while the visitor is elsewhere on the page.
+      // silently gliding past while the visitor is elsewhere on the page.
       // Observes the track at threshold 0 ("any part visible") rather than a
       // fraction of the whole section: a section taller than the viewport can
       // never reach a high ratio, which would pin this off permanently.
@@ -334,10 +401,13 @@
             entries.forEach(function (entry) {
               offScreen = !entry.isIntersecting;
             });
+            startScrolling();
           },
           { threshold: 0 }
         ).observe(track);
       }
+
+      startScrolling();
     }
 
     syncActive();
