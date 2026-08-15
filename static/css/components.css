@@ -499,6 +499,10 @@
   color: var(--text-inverse-muted);
 }
 
+/* Below 1000px/560px this used to keep stacking into a shorter grid, then
+   a full single column — still true for other pages that reuse .why-grid
+   (about.html). The homepage's #why-us instance overrides this further
+   down into a carousel instead; see "Carousel (mobile/tablet)" below. */
 @media (max-width: 1000px) {
   .why-grid {
     grid-template-columns: repeat(2, 1fr);
@@ -508,6 +512,44 @@
 @media (max-width: 560px) {
   .why-grid {
     grid-template-columns: 1fr;
+  }
+}
+
+/* Below 900px (the site's established mobile/tablet breakpoint — see the
+   nav and hero), the HOMEPAGE's Why-Us grid specifically (scoped to
+   #why-us, not every .why-grid — about.html's own copy keeps the plain
+   stacking behaviour above, since it wasn't part of this request) becomes
+   a swipeable, snap-scrolling carousel instead of a tall single column.
+   Native overflow + scroll-snap does the actual scrolling; main.js only
+   adds the pagination dots and mouse-drag support, neither of which CSS
+   alone can do. See "Carousel (mobile/tablet)" below for the shared dot
+   styles. */
+@media (max-width: 900px) {
+  #why-us .why-grid {
+    display: flex;
+    grid-template-columns: none;
+    border: none;
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+    scroll-padding-inline: var(--content-pad);
+    gap: var(--space-4);
+    margin-inline: calc(-1 * var(--content-pad));
+    padding-inline: var(--content-pad);
+    padding-bottom: var(--space-2);
+    scrollbar-width: none;
+  }
+
+  #why-us .why-grid::-webkit-scrollbar {
+    display: none;
+  }
+
+  #why-us .why-item {
+    flex: 0 0 78%;
+    max-width: 360px;
+    scroll-snap-align: start;
+    border: 1px solid var(--border-hairline);
   }
 }
 
@@ -606,6 +648,8 @@
   transform: translateX(3px);
 }
 
+/* Same reasoning as .why-grid above: other pages that reuse .coach-grid
+   (coaches.html) keep the plain stacking grid, unrelated to this request. */
 @media (max-width: 1000px) {
   .coach-grid {
     grid-template-columns: repeat(2, 1fr);
@@ -615,6 +659,99 @@
 @media (max-width: 560px) {
   .coach-grid {
     grid-template-columns: 1fr;
+  }
+}
+
+/* See the equivalent #why-us breakpoint above for why 900px, why
+   overflow+scroll-snap rather than another grid step, and why this is
+   scoped to #coaches specifically (the homepage section) rather than
+   every .coach-grid on the site. */
+@media (max-width: 900px) {
+  #coaches .coach-grid {
+    display: flex;
+    grid-template-columns: none;
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+    scroll-padding-inline: var(--content-pad);
+    gap: var(--space-4);
+    margin-inline: calc(-1 * var(--content-pad));
+    padding-inline: var(--content-pad);
+    padding-bottom: var(--space-2);
+    scrollbar-width: none;
+  }
+
+  #coaches .coach-grid::-webkit-scrollbar {
+    display: none;
+  }
+
+  #coaches .coach-card {
+    flex: 0 0 78%;
+    max-width: 340px;
+    scroll-snap-align: start;
+  }
+}
+
+/* ============ Carousel (mobile/tablet) ============
+   Shared pagination-dot and drag-affordance styles for the homepage's
+   #why-us/#coaches carousels above. Hidden/inert entirely above 900px. */
+
+.carousel-dots {
+  display: none;
+}
+
+@media (max-width: 900px) {
+  #why-us .why-grid,
+  #coaches .coach-grid {
+    cursor: grab;
+  }
+
+  #why-us .why-grid.is-dragging,
+  #coaches .coach-grid.is-dragging {
+    cursor: grabbing;
+    scroll-snap-type: none;
+  }
+
+  .carousel-dots {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: var(--space-1);
+    margin-top: var(--space-5);
+  }
+
+  .carousel-dot {
+    width: 28px;
+    height: 28px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: none;
+    border: none;
+    padding: 0;
+    cursor: pointer;
+  }
+
+  .carousel-dot::before {
+    content: "";
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--border-hairline);
+    transition: width var(--duration-fast) var(--ease-out),
+      border-radius var(--duration-fast) var(--ease-out),
+      background-color var(--duration-fast) var(--ease-out);
+  }
+
+  .carousel-dot:hover::before {
+    background: var(--color-gold-dim);
+  }
+
+  .carousel-dot.is-active::before {
+    width: 20px;
+    border-radius: 3px;
+    background: var(--color-gold);
   }
 }
 

@@ -1,30 +1,40 @@
 {% extends "base.html" %}
 
-{% block title %}Our FIDE-Titled Coaches — TAL Chess Academy{% endblock %}
-{% block meta_description %}Meet the FIDE-titled coaches at TAL Chess Academy — Grandmasters, International Masters, and specialists in junior development and tournament preparation.{% endblock %}
-{% block og_title %}Our FIDE-Titled Coaches — TAL Chess Academy{% endblock %}
-{% block og_description %}Meet the FIDE-titled coaches at TAL Chess Academy — Grandmasters, International Masters, and specialists in junior development and tournament preparation.{% endblock %}
+{% block title %}Our Coaches — TAL Chess Academy{% endblock %}
+{% block meta_description %}Meet the coaches at TAL Chess Academy — the people who guide students through structured training, thoughtful analysis, and steady, practical improvement.{% endblock %}
+{% block og_title %}Our Coaches — TAL Chess Academy{% endblock %}
+{% block og_description %}Meet the coaches at TAL Chess Academy — the people who guide students through structured training, thoughtful analysis, and steady, practical improvement.{% endblock %}
 
 {% block content %}
 
 <header class="page-header">
   <div class="container">
     <p class="breadcrumb"><a href="{% url 'home' %}">Home</a> / Coaches</p>
-    <h1 class="page-header__title">Learn from players who have sat across the board</h1>
+    <h1 class="page-header__title">The people behind your progress</h1>
     <p class="page-header__desc">
-      Every coach on our roster holds a FIDE title and continues to compete. They teach from
-      experience, not just theory.
+      Our coaches teach the reasoning behind every move — how to plan, how to calculate, and how to
+      hold a position together under pressure.
     </p>
   </div>
 </header>
 
 <section class="section">
   <div class="container">
-    <div class="coach-grid" data-reveal-group>
-      {% for coach in coaches %}
-        {% include "partials/coach_card.html" %}
-      {% endfor %}
-    </div>
+    {% if coaches %}
+      <div class="coach-grid" data-reveal-group>
+        {% for coach in coaches %}
+          {% include "partials/coach_card.html" %}
+        {% endfor %}
+      </div>
+    {% else %}
+      <p class="section-intro" data-reveal>
+        We're finalising our coaching profiles and will publish them here shortly. Until then, the
+        fastest way to meet the coach you'd work with is to book a trial and sit across the board.
+      </p>
+      <div style="margin-top:var(--space-6)">
+        <a href="{% url 'contact' %}" class="btn btn-primary">Book a Trial</a>
+      </div>
+    {% endif %}
   </div>
 </section>
 

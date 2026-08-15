@@ -1,13 +1,24 @@
-{% comment %} Expects: coach (dict) {% endcomment %}
+{% comment %}
+  Expects: coach (dict, see academy/data.py for the field reference).
+
+  Only `slug`, `name` and `initials` are assumed to exist. Every other field
+  is rendered only when it is actually present, so a coach with nothing but a
+  name still produces a clean card. Never add a fallback value here — an
+  empty field must stay empty rather than be filled with a placeholder
+  credential.
+{% endcomment %}
 <a href="{% url 'coach_detail' coach.slug %}" class="coach-card img-hover">
   <div class="coach-card__photo">
     <span class="coach-card__monogram">{{ coach.initials }}</span>
-    <span class="coach-card__rating">{{ coach.rating }}</span>
+    {% if coach.credential %}
+      {# Badge slot: verified, checkable credentials only. #}
+      <span class="coach-card__rating">{{ coach.credential }}</span>
+    {% endif %}
   </div>
   <div class="coach-card__body">
-    <p class="coach-card__title">{{ coach.title }}</p>
+    {% if coach.role %}<p class="coach-card__title">{{ coach.role }}</p>{% endif %}
     <h3 class="coach-card__name">{{ coach.name }}</h3>
-    <p class="coach-card__summary">{{ coach.summary }}</p>
+    {% if coach.summary %}<p class="coach-card__summary">{{ coach.summary }}</p>{% endif %}
     <span class="coach-card__link">
       View profile
       <svg viewBox="0 0 24 24" aria-hidden="true"><use href="#icon-arrow"></use></svg>

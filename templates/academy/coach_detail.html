@@ -22,15 +22,28 @@
     </div>
 
     <div data-reveal>
-      <p class="section-label">{{ coach.title }} &middot; Rating {{ coach.rating }}</p>
+      {% comment %}
+        Role and credential are rendered only when supplied, and the credential
+        slot is for verified, checkable facts only — never a placeholder title
+        or rating. See academy/data.py for the field reference.
+      {% endcomment %}
+      {% if coach.role or coach.credential %}
+        <p class="section-label">
+          {{ coach.role }}{% if coach.role and coach.credential %} &middot; {% endif %}{{ coach.credential }}
+        </p>
+      {% endif %}
       <h1 class="section-title" style="font-size:var(--fs-2xl)">{{ coach.name }}</h1>
-      <p class="section-intro" style="max-width:60ch;margin-top:var(--space-4)">{{ coach.bio }}</p>
+      {% if coach.bio %}
+        <p class="section-intro" style="max-width:60ch;margin-top:var(--space-4)">{{ coach.bio }}</p>
+      {% endif %}
 
-      <div class="coach-detail__focus">
-        {% for area in coach.focus %}
-          <span class="tag">{{ area }}</span>
-        {% endfor %}
-      </div>
+      {% if coach.focus %}
+        <div class="coach-detail__focus">
+          {% for area in coach.focus %}
+            <span class="tag">{{ area }}</span>
+          {% endfor %}
+        </div>
+      {% endif %}
 
       <a href="{% url 'contact' %}" class="btn btn-primary" style="margin-top:var(--space-7)">Book a Trial with {{ coach.name }}</a>
     </div>

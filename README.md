@@ -47,20 +47,32 @@ What's still placeholder, deliberately, rather than invented to look real:
   `icon-pin` symbol added to `templates/partials/icon_sprite.html`. The
   `LocalBusiness` JSON-LD in `base.html` still deliberately omits
   `streetAddress` (see "SEO" below) — that's unrelated and still correct as-is.
-- **Most credibility content is placeholder fiction from the original build** —
-  the four coaches and their FIDE titles/ratings and the event calendar are
-  invented. This is the single biggest thing to fix before launch: FIDE
-  ratings are a public, searchable database, so fabricated credentials are
-  checkable. (The homepage's Achievements section and its invented stats —
-  128 tournament victories, 940 students trained, etc. — were removed
-  outright rather than left as placeholder, since the academy has no real
-  track record yet to report; the Testimonials section — three fabricated
-  student quotes — was removed the same way and for the same reason. Add
-  either back once there's something real to show.) The `/faq/` page was
-  deliberately written using *only*
-  claims already established elsewhere on the site, so it
-  inherits no new fabrications — but it will need revisiting once the real
-  coach/programme facts land.
+- **The fabricated coaches have been removed entirely.** `data.COACHES` is now
+  an empty list. It previously held four invented people with invented FIDE
+  titles, invented ratings (2612, 2340, …), invented championships and
+  federation representation. The whole entry was removed rather than partly
+  cleaned, because the *names* were fabricated too — stripping a title off a
+  made-up person still leaves a made-up person on the page. Every coach
+  template now treats each field as optional and omits whatever is absent, so
+  real data can be dropped into `data.COACHES` (see the field reference in
+  that file) without touching any template. **Add only what can actually be
+  substantiated** — the `credential` badge is for verified, checkable facts
+  only. While the list is empty, the Coaches section and `/coaches/` page show
+  an honest "profiles coming shortly" message plus the trial CTA, rather than
+  an empty grid. All coach-credential claims elsewhere (hero, footer, About,
+  `base.html` meta + JSON-LD, `llms.txt`, page metas) were rewritten to
+  describe the teaching approach instead of unverifiable credentials.
+- **Still invented: the event calendar** (`data.EVENTS`) — three made-up
+  events with made-up dates and venues. Same problem class as the coaches,
+  not yet addressed. (The homepage's Achievements section and its invented
+  stats — 128 tournament victories, 940 students trained, etc. — were removed
+  outright, since the academy has no real track record yet to report; the
+  Testimonials section — three fabricated student quotes — was removed the
+  same way and for the same reason. Add either back once there's something
+  real to show.) The `/faq/` page was deliberately written using *only*
+  claims already established elsewhere on the site, so it inherits no new
+  fabrications — but it will need revisiting once the real coach/programme
+  facts land.
 - **SMTP credentials** — `EMAIL_HOST` etc. are unset, so emails currently
   print to the console instead of sending. Needs real credentials before
   registration/contact notifications actually reach anyone (see "Email"
@@ -173,13 +185,14 @@ Three real database models, all in `academy/models.py`:
 - **`ContactSubmission`** — a general enquiry. Same write-only pattern, its
   own simpler status workflow (New → In Progress → Resolved/Closed).
 
-**`academy/data.py` deliberately still holds plain Python data** — coach
-bios, "Why Us" points, events. These have no
-submission workflow and no current admin-editing requirement, so they were
-left as code rather than promoted to models. If a future request needs
-these editable through admin too, follow the same pattern used for
-`Program`: add a model, a migration to seed existing content, update
-`admin.py` and the relevant view in `views.py`. Don't do this preemptively.
+**`academy/data.py` deliberately still holds plain Python data** — coaches
+(currently an empty list awaiting real details — see "Current status" above),
+"Why Us" points, and events. These have no submission workflow and no current
+admin-editing requirement, so they were left as code rather than promoted to
+models. If a future request needs these editable through admin too, follow the
+same pattern used for `Program`: add a model, a migration to seed existing
+content, update `admin.py` and the relevant view in `views.py`. Don't do this
+preemptively.
 
 ---
 

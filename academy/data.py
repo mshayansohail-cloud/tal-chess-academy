@@ -10,8 +10,9 @@ changes, promote it to a model the same way Program was.
 
 WHY_US = [
     {
-        "title": "Titled Coaches",
-        "description": "Every coach on our roster holds a FIDE title and has represented their federation in competitive play.",
+        "title": "Experienced Coaches",
+        "description": "Coaches who work through the reasoning behind every move, not just the move itself, "
+        "and hold each student to a standard they can actually reach.",
     },
     {
         "title": "Structured Curriculum",
@@ -31,56 +32,34 @@ WHY_US = [
     },
 ]
 
-COACHES = [
-    {
-        "slug": "mikhail-orlov",
-        "name": "Mikhail Orlov",
-        "title": "FIDE Grandmaster",
-        "rating": "2612",
-        "initials": "MO",
-        "summary": "Former national champion specialising in classical opening theory and endgame technique.",
-        "bio": "Mikhail earned his Grandmaster title in 2009 after a decade on the international circuit, "
-        "including three national championship titles. He has coached over 40 students to master-level "
-        "ratings and leads the Academy's Advanced and Private Coaching programmes.",
-        "focus": ["Opening theory", "Endgame technique", "Tournament preparation"],
-    },
-    {
-        "slug": "elena-vasquez",
-        "name": "Elena Vasquez",
-        "title": "Woman FIDE Master",
-        "rating": "2340",
-        "initials": "EV",
-        "summary": "Junior development specialist with a decade of experience building tournament-ready young players.",
-        "bio": "Elena has spent ten years developing junior players from their first lesson through their first "
-        "rated tournament. Her structured, patient approach makes her the Academy's lead coach for the "
-        "Junior and Beginner programmes.",
-        "focus": ["Junior development", "Tactical foundations", "Classroom pedagogy"],
-    },
-    {
-        "slug": "daniel-kessler",
-        "name": "Daniel Kessler",
-        "title": "FIDE International Master",
-        "rating": "2455",
-        "initials": "DK",
-        "summary": "Positional specialist known for deep, patient game analysis and structured middlegame planning.",
-        "bio": "Daniel's methodical approach to the middlegame has shaped the Academy's Intermediate curriculum. "
-        "A regular tournament competitor, he brings current competitive experience directly into the "
-        "classroom every week.",
-        "focus": ["Positional play", "Middlegame planning", "Game analysis"],
-    },
-    {
-        "slug": "sofia-marchetti",
-        "name": "Sofia Marchetti",
-        "title": "FIDE Master",
-        "rating": "2280",
-        "initials": "SM",
-        "summary": "Rapid and blitz specialist focused on calculation speed and practical decision-making under time pressure.",
-        "bio": "Sofia represented her federation in three Olympiad cycles before joining the Academy. She now "
-        "focuses on the calculation and time-management skills that separate strong players from "
-        "tournament-ready ones.",
-        "focus": ["Calculation speed", "Time management", "Practical decision-making"],
-    },
-]
+# Deliberately empty until real, verified coach details are supplied.
+#
+# This previously held four entirely fictional coaches — invented names,
+# invented FIDE titles ("Grandmaster", "Woman FIDE Master", ...), invented
+# ratings (2612, 2340, ...), invented championships and federation
+# representation. All of it was placeholder content from the original build,
+# and none of it was true. FIDE titles and ratings are a public, searchable
+# database, so publishing fabricated ones is both checkable and damaging.
+# The whole list was removed rather than partly cleaned, because the names
+# themselves were fabricated: stripping the titles off a made-up person still
+# leaves a made-up person on the page.
+#
+# Every template that renders a coach treats each field below as optional and
+# simply omits anything absent, so partial real data is fine — add only what
+# can actually be substantiated, and leave the rest out. Do not reintroduce a
+# field just to fill the layout.
+#
+#   slug     (required) URL fragment, e.g. "asif-khan"
+#   name     (required) Full name as it should appear
+#   initials (required) Monogram shown in the photo area, e.g. "AK"
+#   role      Coaching role, e.g. "Junior Programme Coach"
+#   summary   One or two lines shown on the card
+#   bio       Longer profile text, shown on the coach's own page
+#   focus     List of specialisation areas, e.g. ["Endgames", "Calculation"]
+#   credential  A verified, checkable credential only (a real FIDE title or
+#               rating, an actual qualification). Omit entirely if there is
+#               nothing verified to show — never a placeholder.
+COACHES = []
 
 EVENTS = [
     {

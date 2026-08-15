@@ -11,7 +11,7 @@
       <h1 class="hero__title">Think deeper.<br>Play with <em>intention</em>.</h1>
       <p class="hero__desc">
         A structured training ground for players who want to compete — not just play.
-        FIDE-titled coaches, a disciplined curriculum, and a culture built around the board.
+        Experienced coaches, a disciplined curriculum, and a culture built around the board.
       </p>
       <div class="hero__actions">
         <a href="{% url 'contact' %}" class="btn btn-primary">Book a Trial</a>
@@ -77,7 +77,7 @@
   </div>
 </section>
 
-<section class="section section--tight surface-secondary" id="why-us" aria-labelledby="why-title">
+<section class="section section--tight surface-secondary" id="why-us" aria-labelledby="why-title" data-carousel>
   <div class="container">
     <div class="section-head">
       <div>
@@ -86,7 +86,14 @@
       </div>
     </div>
 
-    <div class="why-grid" data-reveal-group>
+    <div
+      class="why-grid"
+      data-reveal-group
+      data-carousel-track
+      tabindex="0"
+      role="region"
+      aria-label="Why TAL Chess Academy — {{ why_us|length }} cards, swipe or use arrow keys to see more"
+    >
       {% for item in why_us %}
         <div class="why-item">
           <span class="why-item__index">0{{ forloop.counter }}</span>
@@ -95,27 +102,67 @@
         </div>
       {% endfor %}
     </div>
+
+    <div class="carousel-dots" role="group" aria-label="Card navigation">
+      {% for item in why_us %}
+        <button
+          type="button"
+          class="carousel-dot{% if forloop.first %} is-active{% endif %}"
+          data-carousel-dot
+          aria-current="{% if forloop.first %}true{% else %}false{% endif %}"
+          aria-label="Go to feature {{ forloop.counter }} of {{ why_us|length }}"
+        ></button>
+      {% endfor %}
+    </div>
   </div>
 </section>
 
-<section class="section" id="coaches" aria-labelledby="coaches-title">
+<section class="section" id="coaches" aria-labelledby="coaches-title" data-carousel>
   <div class="container">
     <div class="section-head">
       <div>
         <p class="section-label">05 / Coaches</p>
-        <h2 class="section-title" id="coaches-title">Learn from titled players</h2>
+        <h2 class="section-title" id="coaches-title">The people behind your progress</h2>
       </div>
-      <a href="{% url 'coaches' %}" class="btn-text">
-        View all coaches
-        <svg viewBox="0 0 24 24" aria-hidden="true"><use href="#icon-arrow"></use></svg>
-      </a>
+      {% if coaches %}
+        <a href="{% url 'coaches' %}" class="btn-text">
+          View all coaches
+          <svg viewBox="0 0 24 24" aria-hidden="true"><use href="#icon-arrow"></use></svg>
+        </a>
+      {% endif %}
     </div>
 
-    <div class="coach-grid" data-reveal-group>
-      {% for coach in coaches %}
-        {% include "partials/coach_card.html" %}
-      {% endfor %}
-    </div>
+    {% if coaches %}
+      <div
+        class="coach-grid"
+        data-reveal-group
+        data-carousel-track
+        tabindex="0"
+        role="region"
+        aria-label="Coaches — {{ coaches|length }} cards, swipe or use arrow keys to see more"
+      >
+        {% for coach in coaches %}
+          {% include "partials/coach_card.html" %}
+        {% endfor %}
+      </div>
+
+      <div class="carousel-dots" role="group" aria-label="Coach navigation">
+        {% for coach in coaches %}
+          <button
+            type="button"
+            class="carousel-dot{% if forloop.first %} is-active{% endif %}"
+            data-carousel-dot
+            aria-current="{% if forloop.first %}true{% else %}false{% endif %}"
+            aria-label="Go to coach {{ forloop.counter }} of {{ coaches|length }}"
+          ></button>
+        {% endfor %}
+      </div>
+    {% else %}
+      <p class="section-intro" data-reveal>
+        We're finalising our coaching profiles and will publish them here shortly. Until then, the
+        fastest way to meet the coach you'd work with is to book a trial and sit across the board.
+      </p>
+    {% endif %}
   </div>
 </section>
 

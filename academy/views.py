@@ -94,7 +94,7 @@ def llms_txt(request):
         ('home', 'Home', 'Overview of the academy and its programs'),
         ('about', 'About', "The academy's philosophy and teaching approach"),
         ('programs', 'Programs', 'Course offerings by skill level, from first moves to private coaching'),
-        ('coaches', 'Coaches', 'FIDE-titled coaching staff'),
+        ('coaches', 'Coaches', 'The coaching team'),
         ('events', 'Events', 'Upcoming tournaments and academy events'),
         ('faq', 'FAQ', 'Common questions about programmes, trial lessons, and level placement'),
         ('contact', 'Contact', 'Book a trial lesson or send a general enquiry'),
@@ -103,7 +103,7 @@ def llms_txt(request):
         '# TAL Chess Academy',
         '',
         'TAL Chess Academy trains players from first moves to tournament mastery, '
-        'led by FIDE-titled coaches in a structured, competitive environment.',
+        'with structured coaching built on a clear, level-by-level curriculum.',
         '',
         '## Pages',
         '',
