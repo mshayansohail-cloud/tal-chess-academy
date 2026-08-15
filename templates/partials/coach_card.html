@@ -1,3 +1,4 @@
+{% load static %}
 {% comment %}
   Expects: coach (dict, see academy/data.py for the field reference).
 
@@ -9,16 +10,20 @@
 {% endcomment %}
 <a href="{% url 'coach_detail' coach.slug %}" class="coach-card img-hover">
   <div class="coach-card__photo">
-    <span class="coach-card__monogram">{{ coach.initials }}</span>
-    {% if coach.credential %}
-      {# Badge slot: verified, checkable credentials only. #}
-      <span class="coach-card__rating">{{ coach.credential }}</span>
+    {% if coach.photo %}
+      <img class="coach-card__img" src="{% static coach.photo %}" alt="{{ coach.name }}">
+    {% else %}
+      <span class="coach-card__monogram">{{ coach.initials }}</span>
     {% endif %}
   </div>
   <div class="coach-card__body">
     {% if coach.role %}<p class="coach-card__title">{{ coach.role }}</p>{% endif %}
     <h3 class="coach-card__name">{{ coach.name }}</h3>
     {% if coach.summary %}<p class="coach-card__summary">{{ coach.summary }}</p>{% endif %}
+    {% if coach.credential %}
+      {# Verified, checkable credentials only. #}
+      <span class="tag coach-card__credential">{{ coach.credential }}</span>
+    {% endif %}
     <span class="coach-card__link">
       View profile
       <svg viewBox="0 0 24 24" aria-hidden="true"><use href="#icon-arrow"></use></svg>

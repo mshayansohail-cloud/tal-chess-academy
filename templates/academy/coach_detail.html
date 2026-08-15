@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% load static %}
 
 {% block title %}{{ coach.name }} — TAL Chess Academy{% endblock %}
 {% block meta_description %}{{ coach.summary }}{% endblock %}
@@ -17,7 +18,11 @@
   <div class="container coach-detail">
     <div data-reveal>
       <div class="coach-detail__photo">
-        <span class="coach-detail__monogram">{{ coach.initials }}</span>
+        {% if coach.photo %}
+          <img class="coach-detail__img" src="{% static coach.photo %}" alt="{{ coach.name }}">
+        {% else %}
+          <span class="coach-detail__monogram">{{ coach.initials }}</span>
+        {% endif %}
       </div>
     </div>
 
