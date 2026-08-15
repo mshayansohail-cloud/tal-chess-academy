@@ -28,8 +28,16 @@ What's still placeholder, deliberately, rather than invented to look real:
 - **Email address** in `templates/partials/footer.html` and
   `templates/academy/contact.html` — `contact@yourdomain.com` is still an
   obvious placeholder. Replace it with the real business inbox before going
-  live. **The phone number (+92 348 3186131) is real** — don't strip it; it
-  also feeds the `LocalBusiness` structured data in `base.html` (see below).
+  live. **The phone number is real** (deliberately not repeated here — see
+  the templates above for the actual value) — don't strip it; it also feeds
+  the `LocalBusiness` structured data in `base.html` (see below). **A
+  WhatsApp link now uses that same real number** (`https://wa.me/<number>`,
+  same digits as the `tel:` link, no country-code `+` or spaces) in the
+  footer and as its own entry on the contact page — added after a
+  competitive audit found every local competitor offering WhatsApp contact
+  and TAL offering none. Update both the `tel:` link and the `wa.me` link
+  together if the number ever changes; they're two separate hardcoded
+  occurrences, not derived from one setting.
 - **The street address placeholder has been resolved, differently than
   originally planned.** Rather than eventually swapping "Academy Hall,
   Downtown Centre" for a real street address, every on-site mention of the
