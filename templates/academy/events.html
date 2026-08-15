@@ -1,9 +1,9 @@
 {% extends "base.html" %}
 
 {% block title %}Upcoming Chess Tournaments — TAL Chess Academy{% endblock %}
-{% block meta_description %}See upcoming tournaments and events at TAL Chess Academy, from internal rapid championships to invitational classical events.{% endblock %}
+{% block meta_description %}Upcoming tournaments and events at TAL Chess Academy — internal competitions that keep training grounded in real competitive pressure.{% endblock %}
 {% block og_title %}Upcoming Chess Tournaments — TAL Chess Academy{% endblock %}
-{% block og_description %}See upcoming tournaments and events at TAL Chess Academy, from internal rapid championships to invitational classical events.{% endblock %}
+{% block og_description %}Upcoming tournaments and events at TAL Chess Academy — internal competitions that keep training grounded in real competitive pressure.{% endblock %}
 
 {% block content %}
 
@@ -19,11 +19,18 @@
 
 <section class="section">
   <div class="container">
-    <div class="event-grid" data-reveal-group>
-      {% for event in events %}
-        {% include "partials/event_card.html" %}
-      {% endfor %}
-    </div>
+    {% if events %}
+      <div class="event-grid" data-reveal-group>
+        {% for event in events %}
+          {% include "partials/event_card.html" %}
+        {% endfor %}
+      </div>
+    {% else %}
+      <p class="section-intro" data-reveal>
+        Our tournament calendar for the season is being finalised. Dates will be published here as
+        soon as they're confirmed — ask your coach, or get in touch and we'll let you know.
+      </p>
+    {% endif %}
   </div>
 </section>
 

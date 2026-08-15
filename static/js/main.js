@@ -221,6 +221,103 @@
     track.addEventListener("pointerup", endDrag);
     track.addEventListener("pointercancel", endDrag);
 
+    /* Auto-advance.
+
+       Deliberately cautious, because a carousel that moves on its own is
+       easy to get wrong: it never starts under prefers-reduced-motion, it
+       only runs while the section is actually on screen and the tab is
+       visible, it pauses on hover and while anything inside it has focus,
+       and — most importantly — the first genuine interaction stops it for
+       good. Once someone is driving the carousel themselves, yanking it out
+       from under them mid-read is hostile.
+
+       That last behaviour is also what satisfies WCAG 2.2.2 (Pause, Stop,
+       Hide): swiping, dragging, tapping a dot, scrolling or using the arrow
+       keys all halt the motion permanently. */
+    var AUTO_ADVANCE_MS = 5000;
+    var autoTimer = null;
+    var autoStopped = reduceMotion; // reduced motion: never starts at all
+    var pausedByPointer = false;
+    var pausedByFocus = false;
+    var offScreen = true;
+
+    function carouselIsActive() {
+      // Above 900px both tracks are plain CSS grids with nothing to scroll.
+      return track.scrollWidth > track.clientWidth + 1;
+    }
+
+    function mayAdvance() {
+      return (
+        !autoStopped &&
+        !pausedByPointer &&
+        !pausedByFocus &&
+        !offScreen &&
+        !document.hidden &&
+        carouselIsActive()
+      );
+    }
+
+    function advance() {
+      if (!mayAdvance()) return;
+      var targets = scrollTargets();
+      var current = track.scrollLeft;
+      var maxScroll = track.scrollWidth - track.clientWidth;
+      var next = 0;
+      // At the end, wrap to the first card. Checked explicitly because the
+      // last card can never reach the start edge, so its scroll target sits
+      // beyond maxScroll and would otherwise leave this stuck on the end.
+      if (current < maxScroll - 2) {
+        for (var i = 0; i < targets.length; i++) {
+          if (targets[i] > current + 1) {
+            next = i;
+            break;
+          }
+        }
+      }
+      track.scrollTo({ left: targets[next], behavior: "smooth" });
+    }
+
+    function stopAuto() {
+      autoStopped = true;
+      if (autoTimer) {
+        window.clearInterval(autoTimer);
+        autoTimer = null;
+      }
+    }
+
+    if (!autoStopped) {
+      autoTimer = window.setInterval(advance, AUTO_ADVANCE_MS);
+
+      track.addEventListener("mouseenter", function () { pausedByPointer = true; });
+      track.addEventListener("mouseleave", function () { pausedByPointer = false; });
+      track.addEventListener("focusin", function () { pausedByFocus = true; });
+      track.addEventListener("focusout", function () { pausedByFocus = false; });
+
+      // Any deliberate interaction ends the automatic motion for good.
+      ["touchstart", "wheel", "keydown"].forEach(function (evt) {
+        track.addEventListener(evt, stopAuto, { passive: true });
+      });
+      track.addEventListener("pointerdown", stopAuto);
+      dots.forEach(function (dot) {
+        dot.addEventListener("click", stopAuto);
+      });
+
+      // Only run while the section is actually in view, so the cards aren't
+      // silently cycling past while the visitor is elsewhere on the page.
+      if ("IntersectionObserver" in window) {
+        new IntersectionObserver(
+          function (entries) {
+            entries.forEach(function (entry) {
+              offScreen = !entry.isIntersecting;
+            });
+          },
+          { threshold: 0.35 }
+        ).observe(carousel);
+      } else {
+        offScreen = false;
+      }
+    }
+
     syncActive();
   });
 

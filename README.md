@@ -62,9 +62,13 @@ What's still placeholder, deliberately, rather than invented to look real:
   an empty grid. All coach-credential claims elsewhere (hero, footer, About,
   `base.html` meta + JSON-LD, `llms.txt`, page metas) were rewritten to
   describe the teaching approach instead of unverifiable credentials.
-- **Still invented: the event calendar** (`data.EVENTS`) — three made-up
-  events with made-up dates and venues. Same problem class as the coaches,
-  not yet addressed. (The homepage's Achievements section and its invented
+- **The fabricated events have been removed too.** `data.EVENTS` is now an
+  empty list; it previously held three invented events with invented dates
+  and an invented venue. Same handling as the coaches: the Events section and
+  `/events/` page both stay live and show an honest "calendar being finalised"
+  message, so adding a real event to `data.EVENTS` (field reference is in that
+  file) is all that's needed to bring the listings back. (The homepage's
+  Achievements section and its invented
   stats — 128 tournament victories, 940 students trained, etc. — were removed
   outright, since the academy has no real track record yet to report; the
   Testimonials section — three fabricated student quotes — was removed the
@@ -185,9 +189,9 @@ Three real database models, all in `academy/models.py`:
 - **`ContactSubmission`** — a general enquiry. Same write-only pattern, its
   own simpler status workflow (New → In Progress → Resolved/Closed).
 
-**`academy/data.py` deliberately still holds plain Python data** — coaches
-(currently an empty list awaiting real details — see "Current status" above),
-"Why Us" points, and events. These have no submission workflow and no current
+**`academy/data.py` deliberately still holds plain Python data** — coaches and
+events (both currently empty lists awaiting real details — see "Current
+status" above) and "Why Us" points. These have no submission workflow and no current
 admin-editing requirement, so they were left as code rather than promoted to
 models. If a future request needs these editable through admin too, follow the
 same pattern used for `Program`: add a model, a migration to seed existing

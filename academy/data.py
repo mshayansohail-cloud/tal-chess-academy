@@ -61,26 +61,22 @@ WHY_US = [
 #               nothing verified to show — never a placeholder.
 COACHES = []
 
-EVENTS = [
-    {
-        "name": "Autumn Open Classical",
-        "date": "2026-09-12",
-        "date_label": "12 September 2026",
-        "location": "Academy Hall, Downtown Centre, Karachi",
-        "description": "Our flagship rated classical tournament, open to all Academy students rated 1000 and above.",
-    },
-    {
-        "name": "Junior Rapid Championship",
-        "date": "2026-10-03",
-        "date_label": "3 October 2026",
-        "location": "Academy Hall, Downtown Centre, Karachi",
-        "description": "A rapid-format event for students in the Junior and Beginner programmes, run under FIDE rapid rules.",
-    },
-    {
-        "name": "Winter Invitational",
-        "date": "2026-12-06",
-        "date_label": "6 December 2026",
-        "location": "Riverside Conference Centre, Karachi",
-        "description": "An invitation-only classical event for Advanced and Private Coaching students preparing for national play.",
-    },
-]
+# Deliberately empty until real, scheduled events exist.
+#
+# This previously held three invented events — made-up names ("Autumn Open
+# Classical", "Junior Rapid Championship", "Winter Invitational"), made-up
+# dates, and a made-up venue ("Riverside Conference Centre"). Publishing a
+# tournament calendar nobody can actually turn up to is the same problem as
+# publishing fabricated coach credentials, so it was removed rather than
+# left in place.
+#
+# The Events section and /events/ page both stay live and show an honest
+# "calendar being finalised" message while this is empty, so adding a real
+# event here is all that's needed to bring the listings back.
+#
+#   name         (required) Event title
+#   date         (required) ISO date, e.g. "2026-09-12" — used for ordering
+#   date_label   (required) Human-readable date, e.g. "12 September 2026"
+#   location     (required) Where it actually takes place
+#   description  (required) What it is and who can enter
+EVENTS = []

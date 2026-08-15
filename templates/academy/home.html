@@ -173,17 +173,26 @@
         <p class="section-label">06 / Upcoming Events</p>
         <h2 class="section-title" id="events-title">Compete beyond the classroom</h2>
       </div>
-      <a href="{% url 'events' %}" class="btn-text">
-        All events
-        <svg viewBox="0 0 24 24" aria-hidden="true"><use href="#icon-arrow"></use></svg>
-      </a>
+      {% if events %}
+        <a href="{% url 'events' %}" class="btn-text">
+          All events
+          <svg viewBox="0 0 24 24" aria-hidden="true"><use href="#icon-arrow"></use></svg>
+        </a>
+      {% endif %}
     </div>
 
-    <div class="event-grid" data-reveal-group>
-      {% for event in events %}
-        {% include "partials/event_card.html" %}
-      {% endfor %}
-    </div>
+    {% if events %}
+      <div class="event-grid" data-reveal-group>
+        {% for event in events %}
+          {% include "partials/event_card.html" %}
+        {% endfor %}
+      </div>
+    {% else %}
+      <p class="section-intro" data-reveal>
+        Our tournament calendar for the season is being finalised. Dates will be published here as
+        soon as they're confirmed — ask your coach, or get in touch and we'll let you know.
+      </p>
+    {% endif %}
   </div>
 </section>
 
