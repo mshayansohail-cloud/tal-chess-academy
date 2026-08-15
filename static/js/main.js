@@ -232,14 +232,18 @@
        from under them mid-read is hostile.
 
        That last behaviour is also what satisfies WCAG 2.2.2 (Pause, Stop,
-       Hide): swiping, dragging, tapping a dot, scrolling or using the arrow
-       keys all halt the motion permanently. */
+       Hide): swiping, dragging, tapping a dot, or moving the track with the
+       wheel or arrow keys all halt the motion permanently. */
     var AUTO_ADVANCE_MS = 5000;
     var autoTimer = null;
     var autoStopped = reduceMotion; // reduced motion: never starts at all
-    var pausedByPointer = false;
+    var pausedByHover = false;
     var pausedByFocus = false;
-    var offScreen = true;
+    // Defaults to on-screen so that if the observer below never reports (or
+    // isn't supported), the carousel still advances. Failing the other way
+    // would silently disable the whole feature.
+    var offScreen = false;
+    var programmaticUntil = 0;
 
     function carouselIsActive() {
       // Above 900px both tracks are plain CSS grids with nothing to scroll.
@@ -249,7 +253,7 @@
     function mayAdvance() {
       return (
         !autoStopped &&
-        !pausedByPointer &&
+        !pausedByHover &&
         !pausedByFocus &&
         !offScreen &&
         !document.hidden &&
@@ -274,6 +278,9 @@
           }
         }
       }
+      // Mark the scroll this is about to cause as ours, so the handler below
+      // doesn't mistake the carousel's own movement for the visitor's.
+      programmaticUntil = Date.now() + 1000;
       track.scrollTo({ left: targets[next], behavior: "smooth" });
     }
 
@@ -288,22 +295,39 @@
     if (!autoStopped) {
       autoTimer = window.setInterval(advance, AUTO_ADVANCE_MS);
 
-      track.addEventListener("mouseenter", function () { pausedByPointer = true; });
-      track.addEventListener("mouseleave", function () { pausedByPointer = false; });
+      // Hover pause is for pointing devices only. Touch screens fire
+      // synthetic mouseenter without a reliable matching mouseleave, which
+      // would leave the carousel paused for good after a single tap.
+      if (window.matchMedia("(hover: hover)").matches) {
+        track.addEventListener("mouseenter", function () { pausedByHover = true; });
+        track.addEventListener("mouseleave", function () { pausedByHover = false; });
+      }
       track.addEventListener("focusin", function () { pausedByFocus = true; });
       track.addEventListener("focusout", function () { pausedByFocus = false; });
 
-      // Any deliberate interaction ends the automatic motion for good.
-      ["touchstart", "wheel", "keydown"].forEach(function (evt) {
-        track.addEventListener(evt, stopAuto, { passive: true });
-      });
-      track.addEventListener("pointerdown", stopAuto);
+      // The visitor taking the carousel over ends the automatic motion for
+      // good. Detected from the track's own scroll position rather than from
+      // raw input events: a horizontal scroll this code didn't initiate can
+      // only have come from a swipe, drag, wheel, arrow key or scrollbar.
+      // Listening for touchstart instead (the previous approach) was wrong —
+      // it fired when a finger merely landed on a card to scroll the *page*
+      // vertically, killing auto-advance almost immediately on mobile.
+      track.addEventListener(
+        "scroll",
+        function () {
+          if (Date.now() > programmaticUntil) stopAuto();
+        },
+        { passive: true }
+      );
       dots.forEach(function (dot) {
         dot.addEventListener("click", stopAuto);
       });
 
-      // Only run while the section is actually in view, so the cards aren't
+      // Only run while the cards are actually in view, so they aren't
       // silently cycling past while the visitor is elsewhere on the page.
+      // Observes the track at threshold 0 ("any part visible") rather than a
+      // fraction of the whole section: a section taller than the viewport can
+      // never reach a high ratio, which would pin this off permanently.
       if ("IntersectionObserver" in window) {
         new IntersectionObserver(
           function (entries) {
@@ -311,10 +335,8 @@
               offScreen = !entry.isIntersecting;
             });
           },
-          { threshold: 0.35 }
-        ).observe(carousel);
-      } else {
-        offScreen = false;
+          { threshold: 0 }
+        ).observe(track);
       }
     }
 
