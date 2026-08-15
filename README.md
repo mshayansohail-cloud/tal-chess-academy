@@ -25,16 +25,28 @@ below) so the project isn't tied to one host. There is no live URL right now.
 
 What's still placeholder, deliberately, rather than invented to look real:
 
-- **Contact details** in `templates/partials/footer.html` and
-  `templates/academy/contact.html` — email (`contact@yourdomain.com`) and the
-  street portion of the address ("Academy Hall, Downtown Centre") are still
-  obvious placeholders. **The city (Karachi) and phone number
-  (+92 348 3186131) are both real** — don't strip either; the phone number
+- **Email address** in `templates/partials/footer.html` and
+  `templates/academy/contact.html` — `contact@yourdomain.com` is still an
+  obvious placeholder. Replace it with the real business inbox before going
+  live. **The phone number (+92 348 3186131) is real** — don't strip it; it
   also feeds the `LocalBusiness` structured data in `base.html` (see below).
-  Replace the email and street address with the real business's actual
-  details before going live. (A past product decision explicitly chose
-  obvious placeholders over fabricated-but-realistic-looking business data —
-  don't invent a street address that *looks* real.)
+- **The street address placeholder has been resolved, differently than
+  originally planned.** Rather than eventually swapping "Academy Hall,
+  Downtown Centre" for a real street address, every on-site mention of the
+  location — the Contact page's own Location field
+  (`templates/academy/contact.html`), the footer
+  (`templates/partials/footer.html`), and the FAQ page
+  (`templates/academy/faq.html`) — now links "TAL Chess Academy" straight to
+  the academy's real Google Maps listing
+  (`https://maps.app.goo.gl/GR9WaFxk5Cx3HJqL9`, new tab,
+  `rel="noopener noreferrer"`) instead of displaying any street address text.
+  This is arguably the better long-term answer, not just a workaround — it
+  points at the real location instead of a placeholder, and is more useful to
+  a visitor than plain address text. See `.location-link` (contact page) and
+  `.footer-location` (footer) in `static/css/components.css`, and the
+  `icon-pin` symbol added to `templates/partials/icon_sprite.html`. The
+  `LocalBusiness` JSON-LD in `base.html` still deliberately omits
+  `streetAddress` (see "SEO" below) — that's unrelated and still correct as-is.
 - **Most credibility content is placeholder fiction from the original build** —
   the four coaches and their FIDE titles/ratings and the event calendar are
   invented. This is the single biggest thing to fix before launch: FIDE
