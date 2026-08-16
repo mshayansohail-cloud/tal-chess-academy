@@ -103,17 +103,8 @@
       {% endfor %}
     </div>
 
-    <div class="carousel-dots" role="group" aria-label="Card navigation">
-      {% for item in why_us %}
-        <button
-          type="button"
-          class="carousel-dot{% if forloop.first %} is-active{% endif %}"
-          data-carousel-dot
-          aria-current="{% if forloop.first %}true{% else %}false{% endif %}"
-          aria-label="Go to feature {{ forloop.counter }} of {{ why_us|length }}"
-        ></button>
-      {% endfor %}
-    </div>
+    {# Built by main.js — see the note on the Coaches carousel below. #}
+    <div class="carousel-dots" data-carousel-dots role="group" aria-label="Card navigation"></div>
   </div>
 </section>
 
@@ -146,16 +137,34 @@
         {% endfor %}
       </div>
 
-      <div class="carousel-dots" role="group" aria-label="Coach navigation">
-        {% for coach in coaches %}
-          <button
-            type="button"
-            class="carousel-dot{% if forloop.first %} is-active{% endif %}"
-            data-carousel-dot
-            aria-current="{% if forloop.first %}true{% else %}false{% endif %}"
-            aria-label="Go to coach {{ forloop.counter }} of {{ coaches|length }}"
-          ></button>
-        {% endfor %}
+      {% comment %}
+        The dots are built by main.js, not looped here: how many there are
+        depends on how many cards fit on screen at once (4 on a large
+        desktop, 1 on a phone), which is a layout question the server can't
+        answer and which changes on resize. Leaving them out also means no
+        dead buttons if JavaScript never runs — the track is a plain
+        scrollable row on its own.
+      {% endcomment %}
+      <div class="carousel-controls">
+        <button
+          type="button"
+          class="carousel-arrow carousel-arrow--prev"
+          data-carousel-prev
+          aria-label="Previous coaches"
+        >
+          <svg viewBox="0 0 24 24" aria-hidden="true"><use href="#icon-arrow"></use></svg>
+        </button>
+
+        <div class="carousel-dots" data-carousel-dots role="group" aria-label="Coach navigation"></div>
+
+        <button
+          type="button"
+          class="carousel-arrow carousel-arrow--next"
+          data-carousel-next
+          aria-label="Next coaches"
+        >
+          <svg viewBox="0 0 24 24" aria-hidden="true"><use href="#icon-arrow"></use></svg>
+        </button>
       </div>
     {% else %}
       <p class="section-intro" data-reveal>

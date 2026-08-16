@@ -277,6 +277,53 @@ preemptively.
   lose if the panel's markup changes, and only shows up in landscape
   orientation on a phone (short viewport height), not in normal portrait
   testing, so it's easy to reintroduce without noticing.
+- **The homepage card carousels** (`#coaches` and `#why-us`, see the
+  `[data-carousel]` block in `static/js/main.js` plus "Coaches" and
+  "Carousel controls" in `components.css`). Both are **native
+  `overflow-x` + CSS scroll-snap**, not a JS slider and not a library —
+  the browser keeps doing the scrolling, the momentum and the snapping, and
+  with JavaScript off each one degrades to a plain scrollable row. JS adds
+  only what CSS cannot: grouped pagination, prev/next, and drag-to-scroll
+  for mice. Things worth knowing before editing:
+  - **`#coaches` scrolls at every width; `#why-us` only below 900px.**
+    With five coaches there is no column count that fits one clean row
+    without either orphaning the last card or squeezing them all below a
+    comfortable reading width, so the Coaches row scrolls instead of
+    wrapping (4 cards per view on large desktop, then 3 / 2 / 1). The
+    standalone `/coaches/` page deliberately stays a plain 3-column grid —
+    that page exists to show the whole roster at once.
+  - **Pagination is measured, never hardcoded.** `computePages()` walks the
+    cards and starts a new page each time one no longer fits *entirely*
+    alongside the others. Comparing each card's far edge (not where it
+    starts) is load-bearing: on a phone a card is 78% of the track, so 1.28
+    cards are visible, and a start-based rule would page two at a time and
+    skip one. This is also why coaches can be added or removed without
+    touching the carousel code, and why the dots are built in JS rather
+    than looped in the template.
+  - **Looping is navigational, not duplicated.** "Next" on the last page
+    wraps to the first; no cards are cloned into the DOM to fake an
+    infinite track, so a screen reader still meets each coach exactly once.
+  - **Auto-scroll is heavily guarded.** It never starts under
+    `prefers-reduced-motion`, runs only while the track is on screen and
+    the tab is visible, pauses on hover and while anything inside has
+    focus, and the first genuine interaction stops it permanently (WCAG
+    2.2.2). Takeover is detected inside the animation frame by comparing
+    the track's position against the last value the loop itself set —
+    *not* from raw input events. An earlier attempt listened for
+    `touchstart` and died almost immediately on phones, because a finger
+    landing on a card to scroll the page *vertically* counted as takeover.
+  - **`.is-autoscrolling` must stay outside any media query.** It suspends
+    mandatory scroll-snap while the loop drives the track; scoped to a
+    breakpoint, snap would fight the auto-scroll and freeze it at whatever
+    widths the rule didn't reach.
+- **`?motion=on` forces animation on for one page load** (see the top of
+  `static/js/main.js`). Windows with animations switched off reports
+  `prefers-reduced-motion: reduce` to *every* browser on the machine, so
+  the carousels can never be seen moving while developing there — the site
+  looks broken to whoever is building it while behaving correctly for
+  everyone else. The flag is strictly opt-in per URL: no visitor who hasn't
+  typed it is affected, so what ships is unchanged. Use it for previewing;
+  don't wire it into any default.
 - **Accessibility (WCAG 2.2 AA) has already had a full audit-and-fix pass.**
   Notable patterns already in place, worth preserving in any future edits:
   a skip-to-content link; `aria-invalid` +

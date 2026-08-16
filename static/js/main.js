@@ -1,7 +1,20 @@
 (function () {
   "use strict";
 
-  var reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  /* The OS "reduce motion" preference is honoured everywhere by default:
+     reveals, smooth scrolling, counters and carousel auto-scroll all stand
+     down when it is set.
+
+     `?motion=on` overrides it for that one page load. This exists because a
+     machine with Windows animations switched off reports "reduce" to every
+     browser on it, so the carousels can never be seen moving while working
+     on such a machine — the site looks broken to the person building it
+     while behaving correctly for everyone else. Strictly opt-in per URL:
+     no visitor who hasn't typed the parameter is affected, so the
+     accessibility behaviour that actually ships is unchanged. */
+  var forceMotion = window.location.search.indexOf("motion=on") !== -1;
+  var reduceMotion =
+    !forceMotion && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
   /* Mobile nav toggle */
   var navToggle = document.querySelector(".nav-toggle");
@@ -94,19 +107,32 @@
   }
 
   /* Card carousels (Why Us / Coaches) — CSS overflow + scroll-snap does the
-     scrolling and the snapping; JS adds only what CSS cannot: pagination
-     dots that drive the track, and that stay in sync when the user moves
-     the track themselves. Each [data-carousel] section keeps its state in
-     its own closure, so the two carousels never affect one another.
-     Deliberately NOT gated behind a matchMedia check: above 900px the
-     tracks are plain CSS grids with no overflow, so every handler below
-     is inert there (nothing to scroll, dots hidden via CSS) — simpler and
-     more robust than tracking the 900px breakpoint in JS as well. */
+     scrolling and the snapping; JS adds only what CSS cannot: grouped
+     pagination that drives the track and stays in sync when the visitor
+     moves it themselves, prev/next controls, and drag-to-scroll for mice.
+     Each [data-carousel] section keeps its state in its own closure, so the
+     two carousels never affect one another.
+
+     Everything below is measured from the real layout rather than told how
+     many cards are on screen. That is what lets one implementation serve
+     #why-us (a carousel only below 900px, one card at a time) and #coaches
+     (a carousel at every width, 4/3/2/1 cards depending on the breakpoint)
+     without either one knowing about the other's CSS — and what lets coaches
+     be added or removed later without touching this file. */
   document.querySelectorAll("[data-carousel]").forEach(function (carousel) {
     var track = carousel.querySelector("[data-carousel-track]");
-    var dots = Array.prototype.slice.call(carousel.querySelectorAll("[data-carousel-dot]"));
+    var dotsHost = carousel.querySelector("[data-carousel-dots]");
+    var prevBtn = carousel.querySelector("[data-carousel-prev]");
+    var nextBtn = carousel.querySelector("[data-carousel-next]");
     var cards = track ? Array.prototype.slice.call(track.children) : [];
-    if (!track || !dots.length || !cards.length) return;
+    if (!track || !cards.length) return;
+
+    var dots = [];
+    // Scroll offsets, one per page. A "page" is a group of cards that fits
+    // on screen together, so on desktop one page is 4 coaches and on a phone
+    // it is one. Always at least [0] — a single page means nothing scrolls.
+    var pages = [0];
+    var activePage = 0;
 
     // The scrollLeft each card needs in order to sit at the track's start
     // edge. The measurement cancels out the current scroll position, so the
@@ -128,47 +154,143 @@
       return cachedTargets;
     }
 
-    function setActive(index) {
+    /* Walk the cards, starting a new page each time one no longer fits
+       entirely alongside those already on the current page.
+
+       "Fits entirely" is the load-bearing part. Measuring where the next
+       card *starts* would be wrong wherever a card deliberately peeks past
+       the edge: on a phone the track is 375px and a card is 78% of it, so
+       1.28 cards are visible, and a start-based rule would page two cards at
+       a time and skip one. Comparing the card's far edge instead counts only
+       fully visible cards, which gives 4/3/2/1 per page exactly as the CSS
+       lays them out, and still handles a short final group (5 coaches, 4 per
+       page → a second page holding one). */
+    function computePages() {
+      var targets = scrollTargets();
+      var style = window.getComputedStyle(track);
+      var padLeft = parseFloat(style.paddingLeft) || 0;
+      var padRight = parseFloat(style.paddingRight) || 0;
+      // clientWidth includes the track's own padding; the cards only occupy
+      // the content box, so the two have to be compared like for like.
+      var viewport = track.clientWidth - padLeft - padRight;
+      var maxScroll = Math.max(0, track.scrollWidth - track.clientWidth);
+      if (maxScroll <= 1 || viewport <= 0) return [0];
+
+      var starts = [];
+      var i = 0;
+      while (i < targets.length) {
+        var start = Math.min(targets[i], maxScroll);
+        if (!starts.length || start - starts[starts.length - 1] > 1) starts.push(start);
+        if (start >= maxScroll - 1) break;
+        var j = i + 1;
+        while (j < cards.length && targets[j] + cards[j].offsetWidth <= start + viewport + 1) j++;
+        i = j > i ? j : i + 1;
+      }
+      // The final group is bounded by the end of the track, not by a card
+      // boundary, so the last page may sit mid-card. Snapping it to
+      // maxScroll is what makes the last dot actually reach the end.
+      if (starts[starts.length - 1] < maxScroll - 1) starts.push(maxScroll);
+      return starts;
+    }
+
+    function updateDots() {
       dots.forEach(function (dot, i) {
-        var isActive = i === index;
+        var isActive = i === activePage;
         dot.classList.toggle("is-active", isActive);
         dot.setAttribute("aria-current", isActive ? "true" : "false");
       });
     }
 
-    // Whichever card sits closest to the current scroll position wins.
+    /* Dots are built here rather than in the template because how many
+       there are depends on how many cards fit, which is a layout question
+       the server cannot answer — and which changes on resize. Rebuilt only
+       when the count actually changes, so resizing within a breakpoint
+       doesn't destroy a focused dot. */
+    function renderDots() {
+      if (!dotsHost) return;
+      if (dots.length === pages.length) {
+        updateDots();
+        return;
+      }
+      dotsHost.innerHTML = "";
+      dots = pages.map(function (_, i) {
+        var dot = document.createElement("button");
+        dot.type = "button";
+        dot.className = "carousel-dot";
+        dot.setAttribute("data-carousel-dot", "");
+        dot.setAttribute("aria-label", "Go to slide " + (i + 1) + " of " + pages.length);
+        dot.addEventListener("click", function () {
+          goTo(i, true);
+        });
+        dotsHost.appendChild(dot);
+        return dot;
+      });
+      updateDots();
+    }
+
+    /* Wraps in both directions, so "next" on the final page returns to the
+       first and "previous" on the first jumps to the last. The loop is in
+       the navigation, not the DOM — no cards are cloned to fake an endless
+       track, so a screen reader still encounters each coach exactly once. */
+    function goTo(index, fromUser) {
+      var total = pages.length;
+      if (!total) return;
+      activePage = ((index % total) + total) % total;
+      // scrollTo on the track, not scrollIntoView on a card: scrollIntoView
+      // also scrolls every scrollable ancestor, which yanks the whole page
+      // down to the section instead of just moving the carousel.
+      track.scrollTo({
+        left: pages[activePage],
+        behavior: reduceMotion ? "auto" : "smooth",
+      });
+      updateDots();
+      if (fromUser) stopAuto();
+    }
+
+    // Whichever page start sits closest to the current scroll position wins.
     // Deliberately not an IntersectionObserver: cards are wide enough that
     // two neighbours can straddle any fixed threshold, so which one "wins"
     // ends up depending on callback ordering. Comparing distances is
     // deterministic, and stays correct at the end of the track, where the
-    // last card can never actually reach the start edge.
+    // last page can never actually reach the start edge.
     function syncActive() {
       var current = track.scrollLeft;
       var nearest = 0;
       var shortest = Infinity;
-      scrollTargets().forEach(function (target, i) {
+      pages.forEach(function (target, i) {
         var distance = Math.abs(target - current);
         if (distance < shortest) {
           shortest = distance;
           nearest = i;
         }
       });
-      setActive(nearest);
+      activePage = nearest;
+      updateDots();
     }
 
-    dots.forEach(function (dot, i) {
-      dot.addEventListener("click", function () {
-        // scrollTo on the track, not scrollIntoView on the card:
-        // scrollIntoView also scrolls every scrollable ancestor, which
-        // yanks the whole page down to the section instead of just
-        // moving the carousel.
-        track.scrollTo({
-          left: scrollTargets()[i],
-          behavior: reduceMotion ? "auto" : "smooth",
-        });
-        setActive(i);
+    function measure() {
+      cachedTargets = null;
+      pages = computePages();
+      // Below its breakpoint #why-us is a plain grid, and #coaches would be
+      // too if it ever held few enough coaches to fit — either way there is
+      // nothing to page through, so the whole control row goes away rather
+      // than sitting there as decoration.
+      carousel.classList.toggle("carousel--inert", pages.length <= 1);
+      renderDots();
+      syncActive();
+    }
+
+    if (prevBtn) {
+      prevBtn.addEventListener("click", function () {
+        goTo(activePage - 1, true);
       });
-    });
+    }
+
+    if (nextBtn) {
+      nextBtn.addEventListener("click", function () {
+        goTo(activePage + 1, true);
+      });
+    }
 
     var pendingFrame = null;
     track.addEventListener(
@@ -183,13 +305,18 @@
       { passive: true }
     );
 
-    // Card widths are percentage-based, so a resize or rotation moves every
-    // scroll target — drop the cache and re-resolve which dot is current.
+    // Card widths are percentage-based and the breakpoints change how many
+    // fit per page, so a resize or rotation invalidates the offsets, the
+    // page grouping and the dot count alike.
+    var pendingResize = null;
     window.addEventListener(
       "resize",
       function () {
-        cachedTargets = null;
-        syncActive();
+        if (pendingResize) return;
+        pendingResize = window.requestAnimationFrame(function () {
+          pendingResize = null;
+          measure();
+        });
       },
       { passive: true }
     );
@@ -237,7 +364,7 @@
     track.addEventListener("pointerup", endDrag);
     track.addEventListener("pointercancel", endDrag);
 
-    /* Continuous auto-scroll.
+    /* Continuous auto-scroll, at every width.
 
        The track glides at a constant speed rather than jumping card to
        card, so the time spent crossing a card is proportional to its width
@@ -252,8 +379,8 @@
        carousel themselves, taking it back mid-read is hostile.
 
        That last behaviour is also what satisfies WCAG 2.2.2 (Pause, Stop,
-       Hide): swiping, dragging, tapping a dot, or moving the track with the
-       wheel or arrow keys all halt the motion permanently. */
+       Hide): swiping, dragging, tapping a dot or arrow, or moving the track
+       with the wheel or arrow keys all halt the motion permanently. */
     var AUTO_SCROLL_PX_PER_SEC = 42;
     var END_PAUSE_MS = 1100;
 
@@ -271,7 +398,8 @@
     var offScreen = false;
 
     function carouselIsActive() {
-      // Above 900px both tracks are plain CSS grids with nothing to scroll.
+      // #why-us is a plain grid above 900px, and a track with everything
+      // already visible has nothing to scroll either way.
       return track.scrollWidth > track.clientWidth + 1;
     }
 
@@ -385,10 +513,9 @@
       // position against the last value this loop set. Raw input events are
       // the wrong signal — listening for touchstart (an earlier attempt)
       // fired when a finger merely landed on a card to scroll the *page*
-      // vertically, killing the motion almost immediately on mobile.
-      dots.forEach(function (dot) {
-        dot.addEventListener("click", stopAuto);
-      });
+      // vertically, killing the motion almost immediately on mobile. The
+      // dots and arrows are the exception: those are unambiguous, and their
+      // handlers call stopAuto() through goTo() directly.
 
       // Only run while the cards are actually in view, so they aren't
       // silently gliding past while the visitor is elsewhere on the page.
@@ -410,7 +537,7 @@
       startScrolling();
     }
 
-    syncActive();
+    measure();
   });
 
   /* Animated stat counters */

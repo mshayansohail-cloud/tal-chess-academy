@@ -555,9 +555,17 @@
 
 /* ============ Coaches ============ */
 
+/* The full-roster grid on /coaches/. The homepage's own #coaches instance
+   overrides all of this into a carousel further down.
+
+   3 columns rather than 4: with 5 coaches, 4 columns orphans the 5th onto a
+   row of its own, and 5 columns only fits by squeezing every card down to
+   ~200px. 3 columns gives a 3+2 split that reads as an intentional shorter
+   final row, and keeps cards ~350px wide — the roster page is the one place
+   a visitor wants to see every coach at once, so a grid stays right here. */
 .coach-grid {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(3, 1fr);
   gap: var(--space-6);
 }
 
@@ -654,7 +662,7 @@
 }
 
 /* Same reasoning as .why-grid above: other pages that reuse .coach-grid
-   (coaches.html) keep the plain stacking grid, unrelated to this request. */
+   (coaches.html) keep the plain stacking grid. */
 @media (max-width: 1000px) {
   .coach-grid {
     grid-template-columns: repeat(2, 1fr);
@@ -667,63 +675,205 @@
   }
 }
 
-/* See the equivalent #why-us breakpoint above for why 900px, why
-   overflow+scroll-snap rather than another grid step, and why this is
-   scoped to #coaches specifically (the homepage section) rather than
-   every .coach-grid on the site. */
-@media (max-width: 900px) {
-  #coaches .coach-grid {
-    display: flex;
-    grid-template-columns: none;
-    overflow-x: auto;
-    overscroll-behavior-x: contain;
-    scroll-snap-type: x mandatory;
-    -webkit-overflow-scrolling: touch;
-    scroll-padding-inline: var(--content-pad);
-    gap: var(--space-4);
-    margin-inline: calc(-1 * var(--content-pad));
-    padding-inline: var(--content-pad);
-    padding-bottom: var(--space-2);
-    scrollbar-width: none;
-  }
+/* ---- Homepage Coaches carousel ----
+   Unlike #why-us (which is a carousel only below 900px and a grid above),
+   the homepage's #coaches track scrolls at EVERY width. With 5 coaches
+   there is no column count that fits them in one clean row without either
+   orphaning the last card or shrinking all of them past comfortable
+   reading width, so the row scrolls instead of wrapping.
 
-  #coaches .coach-grid::-webkit-scrollbar {
-    display: none;
-  }
+   Still native overflow + scroll-snap rather than a transform-based
+   slider: the browser keeps doing the scrolling, the momentum, and the
+   snapping, and the whole thing degrades to a plain scrollable row with
+   JavaScript off. main.js adds only what CSS cannot — grouped pagination,
+   prev/next, and drag-to-scroll for mice.
 
+   Card counts per view are set by flex-basis with the gap subtracted, so
+   they stay exact as coaches are added or removed; nothing here assumes
+   there are five. */
+#coaches .coach-grid {
+  display: flex;
+  grid-template-columns: none;
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;
+  scroll-padding-inline: var(--content-pad);
+  gap: var(--space-5);
+  /* Bleed to the container's edge so a partially-scrolled card runs to the
+     edge of the content column rather than stopping short inside it. */
+  margin-inline: calc(-1 * var(--content-pad));
+  padding-inline: var(--content-pad);
+  padding-bottom: var(--space-2);
+  scrollbar-width: none;
+  cursor: grab;
+}
+
+#coaches .coach-grid::-webkit-scrollbar {
+  display: none;
+}
+
+#coaches .coach-grid.is-dragging {
+  cursor: grabbing;
+  scroll-snap-type: none;
+}
+
+/* 4 across on large desktop (~265px cards at the 1240px content max). */
+#coaches .coach-card {
+  flex: 0 0 calc((100% - 3 * var(--space-5)) / 4);
+  scroll-snap-align: start;
+}
+
+/* 3 across on standard desktop/laptop (~350px cards). */
+@media (max-width: 1199px) {
   #coaches .coach-card {
-    flex: 0 0 78%;
-    max-width: 340px;
-    scroll-snap-align: start;
+    flex-basis: calc((100% - 2 * var(--space-5)) / 3);
   }
 }
 
-/* ============ Carousel (mobile/tablet) ============
-   Shared pagination-dot and drag-affordance styles for the homepage's
-   #why-us/#coaches carousels above. Hidden/inert entirely above 900px. */
+/* 2 across on tablet. */
+@media (max-width: 899px) {
+  #coaches .coach-card {
+    flex-basis: calc((100% - var(--space-5)) / 2);
+  }
+}
+
+/* 1 across on phones, keeping the partial next card visible — the peek is
+   what signals the row scrolls at all before anyone touches it. */
+@media (max-width: 599px) {
+  #coaches .coach-grid {
+    gap: var(--space-4);
+  }
+
+  #coaches .coach-card {
+    flex-basis: 78%;
+    max-width: 340px;
+  }
+}
+
+/* ============ Carousel controls ============
+   Shared pagination-dot, prev/next and drag-affordance styles for the
+   homepage's #why-us and #coaches carousels above.
+
+   Two different visibility rules, because the two carousels differ:
+   #why-us is a carousel only below 900px, so its bare .carousel-dots stay
+   hidden above that; #coaches scrolls at every width, so its dots live
+   inside .carousel-controls, which is always shown. main.js hides the whole
+   control row via .carousel--inert whenever everything already fits and
+   there is nothing to page through. */
 
 .carousel-dots {
   display: none;
 }
 
+.carousel-dot {
+  width: 28px;
+  height: 28px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+}
+
+/* State is carried by shape and size as well as colour (a 6px dot grows
+   into a 20px bar), so the active slide is still identifiable without
+   relying on the gold alone. */
+.carousel-dot::before {
+  content: "";
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--border-hairline);
+  transition: width var(--duration-fast) var(--ease-out),
+    border-radius var(--duration-fast) var(--ease-out),
+    background-color var(--duration-fast) var(--ease-out);
+}
+
+.carousel-dot:hover::before {
+  background: var(--color-gold-dim);
+}
+
+.carousel-dot.is-active::before {
+  width: 20px;
+  border-radius: 3px;
+  background: var(--color-gold);
+}
+
+.carousel-controls {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-4);
+  margin-top: var(--space-6);
+}
+
+/* Nothing to page through — main.js sets this when every card already fits. */
+.carousel--inert .carousel-controls {
+  display: none;
+}
+
+.carousel-controls .carousel-dots {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-1);
+  margin-top: 0;
+}
+
+/* Square hairline buttons, matching the card borders rather than the
+   pill-shaped arrows a generic slider would ship with. */
+.carousel-arrow {
+  width: 40px;
+  height: 40px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  padding: 0;
+  background: none;
+  border: 1px solid var(--border-hairline);
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: border-color var(--duration-fast) var(--ease-out),
+    color var(--duration-fast) var(--ease-out);
+}
+
+.carousel-arrow:hover {
+  border-color: var(--color-gold-dim);
+  color: var(--color-gold);
+}
+
+.carousel-arrow svg {
+  width: 14px;
+  height: 14px;
+}
+
+/* Reuses #icon-arrow rather than adding a mirrored twin to the sprite. */
+.carousel-arrow--prev svg {
+  transform: scaleX(-1);
+}
+
+/* Mandatory snap pulls the track back to the nearest card on every frame,
+   which fights the continuous auto-scroll. Suspended while the carousel is
+   driving itself; main.js restores it the moment the visitor takes over, so
+   their own swipes still settle neatly on a card. Outside any media query:
+   #coaches auto-scrolls at every width, and for #why-us (a plain grid above
+   900px, with nothing to scroll) this is simply inert. */
+#why-us .why-grid.is-autoscrolling,
+#coaches .coach-grid.is-autoscrolling {
+  scroll-snap-type: none;
+}
+
 @media (max-width: 900px) {
-  #why-us .why-grid,
-  #coaches .coach-grid {
+  #why-us .why-grid {
     cursor: grab;
   }
 
-  #why-us .why-grid.is-dragging,
-  #coaches .coach-grid.is-dragging {
+  #why-us .why-grid.is-dragging {
     cursor: grabbing;
-    scroll-snap-type: none;
-  }
-
-  /* Mandatory snap pulls the track back to the nearest card on every frame,
-     which fights the continuous auto-scroll. Suspended while the carousel is
-     driving itself; main.js restores it the moment the visitor takes over,
-     so their own swipes still settle neatly on a card. */
-  #why-us .why-grid.is-autoscrolling,
-  #coaches .coach-grid.is-autoscrolling {
     scroll-snap-type: none;
   }
 
@@ -733,39 +883,6 @@
     align-items: center;
     gap: var(--space-1);
     margin-top: var(--space-5);
-  }
-
-  .carousel-dot {
-    width: 28px;
-    height: 28px;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    background: none;
-    border: none;
-    padding: 0;
-    cursor: pointer;
-  }
-
-  .carousel-dot::before {
-    content: "";
-    width: 6px;
-    height: 6px;
-    border-radius: 50%;
-    background: var(--border-hairline);
-    transition: width var(--duration-fast) var(--ease-out),
-      border-radius var(--duration-fast) var(--ease-out),
-      background-color var(--duration-fast) var(--ease-out);
-  }
-
-  .carousel-dot:hover::before {
-    background: var(--color-gold-dim);
-  }
-
-  .carousel-dot.is-active::before {
-    width: 20px;
-    border-radius: 3px;
-    background: var(--color-gold);
   }
 }
 
