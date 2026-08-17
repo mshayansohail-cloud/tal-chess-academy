@@ -325,6 +325,19 @@ preemptively.
     mandatory scroll-snap while the loop drives the track; scoped to a
     breakpoint, snap would fight the auto-scroll and freeze it at whatever
     widths the rule didn't reach.
+- **Use `{% versioned_static %}`, not `{% static %}`, for CSS and JS**
+  (`academy/templatetags/assets.py`). The dev server sends static files with
+  no `Cache-Control` header, so browsers apply their own heuristic freshness
+  and serve an edited stylesheet from cache for a long time without even
+  revalidating. The failure is invisible and expensive: the page renders,
+  nothing errors, and you are simply looking at the previous version of the
+  site while debugging code that is already correct. Renaming a CSS class
+  makes it far worse — cached CSS then matches nothing, so elements fall
+  back to unstyled intrinsic sizes and the layout collapses rather than just
+  looking out of date. The tag appends the file's mtime, so every edit is a
+  new URL. It is a no-op when `DEBUG` is off, where WhiteNoise's
+  `CompressedManifestStaticFilesStorage` already content-hashes the
+  filename — don't "simplify" it back to `{% static %}`.
 - **`?motion=on` forces animation on for one page load** (see the top of
   `static/js/main.js`). Windows with animations switched off reports
   `prefers-reduced-motion: reduce` to *every* browser on the machine, so

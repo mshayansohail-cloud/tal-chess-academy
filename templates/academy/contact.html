@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% load static %}
+{% load static assets %}
 
 {% block title %}Book a Trial Lesson — TAL Chess Academy{% endblock %}
 {% block meta_description %}Book a trial lesson or get in touch with TAL Chess Academy — we typically reply within one business day.{% endblock %}
@@ -252,5 +252,5 @@
 {% endblock %}
 
 {% block extra_js %}
-<script src="{% static 'js/forms.js' %}" defer></script>
+<script src="{% versioned_static 'js/forms.js' %}" defer></script>
 {% endblock %}
