@@ -11,10 +11,16 @@
 <a href="{% url 'coach_detail' coach.slug %}" class="coach-card img-hover">
   <div class="coach-card__photo">
     {% if coach.photo %}
-      {# Lazy: the Coaches row sits far below the fold on every viewport, and
-         these five photos are the page's heaviest payload. The wrapper sets
-         aspect-ratio, so deferring them costs no layout shift. The detail
-         page loads its copy eagerly — there the photo is the hero. #}
+      {% comment %}
+        Lazy: the Coaches row sits far below the fold on every viewport, and
+        these five photos are the page's heaviest payload. The wrapper sets
+        aspect-ratio, so deferring them costs no layout shift. The detail
+        page loads its copy eagerly — there the photo is the hero.
+
+        Block-tag comment rather than the hash form: Django's hash comment
+        does not span lines, and a multi-line one leaks its text straight
+        into the rendered page — once per coach, from this partial.
+      {% endcomment %}
       <img
         class="coach-card__img"
         src="{% static coach.photo %}"
