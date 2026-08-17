@@ -123,8 +123,11 @@ class RegistrationAPITests(APITestCase):
         response = self.client.get('/api/registrations/')
         self.assertEqual(response.status_code, status.HTTP_405_METHOD_NOT_ALLOWED)
 
-    @patch('academy.emails.send_mail', side_effect=Exception('SMTP is down'))
-    def test_database_save_succeeds_even_if_email_sending_fails(self, mock_send_mail):
+    # Patches the send itself rather than the helper that builds the message,
+    # so this keeps asserting the real guarantee — a submission survives a
+    # dead mail server — regardless of which mail API academy.emails uses.
+    @patch('academy.emails.EmailMessage.send', side_effect=Exception('SMTP is down'))
+    def test_database_save_succeeds_even_if_email_sending_fails(self, mock_send):
         response = self.client.post('/api/registrations/', self.valid_payload, format='json')
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertTrue(TrialRegistration.objects.filter(email='student@example.com').exists())

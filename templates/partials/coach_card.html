@@ -11,7 +11,17 @@
 <a href="{% url 'coach_detail' coach.slug %}" class="coach-card img-hover">
   <div class="coach-card__photo">
     {% if coach.photo %}
-      <img class="coach-card__img" src="{% static coach.photo %}" alt="{{ coach.name }}">
+      {# Lazy: the Coaches row sits far below the fold on every viewport, and
+         these five photos are the page's heaviest payload. The wrapper sets
+         aspect-ratio, so deferring them costs no layout shift. The detail
+         page loads its copy eagerly — there the photo is the hero. #}
+      <img
+        class="coach-card__img"
+        src="{% static coach.photo %}"
+        alt="{{ coach.name }}"
+        loading="lazy"
+        decoding="async"
+      >
     {% else %}
       <span class="coach-card__monogram">{{ coach.initials }}</span>
     {% endif %}

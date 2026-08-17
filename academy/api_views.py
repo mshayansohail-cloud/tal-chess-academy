@@ -6,7 +6,12 @@ from rest_framework.views import APIView
 from . import emails
 from .models import Program
 from .serializers import ContactSubmissionSerializer, ProgramSerializer, TrialRegistrationSerializer
-from .throttling import ContactRateThrottle, RegistrationRateThrottle
+from .throttling import (
+    ContactBurstThrottle,
+    ContactRateThrottle,
+    RegistrationBurstThrottle,
+    RegistrationRateThrottle,
+)
 
 
 class ProgramListAPIView(generics.ListAPIView):
@@ -33,15 +38,19 @@ class RegistrationCreateAPIView(APIView):
     # who happens to be logged into /staff-portal/ in the same browser (e.g.
     # staff testing their own site), since forms.js never sends a CSRF token.
     authentication_classes = []
-    throttle_classes = [RegistrationRateThrottle]
+    throttle_classes = [RegistrationRateThrottle, RegistrationBurstThrottle]
     parser_classes = [JSONParser]
 
     def post(self, request):
         serializer = TrialRegistrationSerializer(data=request.data)
         if not serializer.is_valid():
+            # Deliberately returns before recording against the submission
+            # throttle: a validation error costs the visitor a correction,
+            # not their remaining quota. See academy/throttling.py.
             return Response({'success': False, 'errors': serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
 
         registration = serializer.save()
+        RegistrationRateThrottle().record(request, self)
 
         # Best-effort: the record above is already saved regardless of outcome.
         emails.send_registration_notification(registration)
@@ -66,15 +75,17 @@ class ContactCreateAPIView(APIView):
     permission_classes = [permissions.AllowAny]
     # See RegistrationCreateAPIView above for why authentication is disabled here.
     authentication_classes = []
-    throttle_classes = [ContactRateThrottle]
+    throttle_classes = [ContactRateThrottle, ContactBurstThrottle]
     parser_classes = [JSONParser]
 
     def post(self, request):
         serializer = ContactSubmissionSerializer(data=request.data)
         if not serializer.is_valid():
+            # See the note in RegistrationCreateAPIView above.
             return Response({'success': False, 'errors': serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
 
         submission = serializer.save()
+        ContactRateThrottle().record(request, self)
 
         emails.send_contact_notification(submission)
         emails.send_contact_confirmation(submission)

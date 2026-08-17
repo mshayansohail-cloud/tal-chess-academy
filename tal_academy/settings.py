@@ -289,10 +289,18 @@ REST_FRAMEWORK = {
     'DEFAULT_THROTTLE_CLASSES': [
         'rest_framework.throttling.AnonRateThrottle',
     ],
+    # Two tiers per write endpoint — see academy/throttling.py for why.
+    # The 'registration'/'contact' scopes count only submissions that
+    # actually saved; the '_burst' scopes count every request that arrives,
+    # so a bot posting deliberately-invalid payloads is still capped.
+    # Raised from 5/hour: that was low enough that a family booking for two
+    # children, or anyone whose first attempt was rejected, could hit it.
     'DEFAULT_THROTTLE_RATES': {
         'anon': '60/hour',
-        'registration': '5/hour',
+        'registration': '10/hour',
         'contact': '10/hour',
+        'registration_burst': '40/hour',
+        'contact_burst': '40/hour',
     },
     # Secure by default: any future view that forgets to set permission_classes
     # is private, not public. The three current public endpoints opt in to

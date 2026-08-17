@@ -65,8 +65,14 @@ button {
   cursor: pointer;
 }
 
+/* `select` belongs here with the others: without it the dropdowns on the
+   booking form fall back to the browser default (Arial ~13px) while every
+   input beside them renders in Inter at 17px, which reads as an unstyled
+   control on the site's main conversion form. Inheriting also keeps them
+   above 16px, below which iOS zooms the page in on focus. */
 input,
-textarea {
+textarea,
+select {
   font: inherit;
   color: inherit;
 }
