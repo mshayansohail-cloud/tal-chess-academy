@@ -25,19 +25,28 @@ below) so the project isn't tied to one host. There is no live URL right now.
 
 What's still placeholder, deliberately, rather than invented to look real:
 
-- **Email address** in `templates/partials/footer.html` and
-  `templates/academy/contact.html` — `contact@yourdomain.com` is still an
-  obvious placeholder. Replace it with the real business inbox before going
-  live. **The phone number is real** (deliberately not repeated here — see
-  the templates above for the actual value) — don't strip it; it also feeds
-  the `LocalBusiness` structured data in `base.html` (see below). **A
-  WhatsApp link now uses that same real number** (`https://wa.me/<number>`,
-  same digits as the `tel:` link, no country-code `+` or spaces) in the
-  footer and as its own entry on the contact page — added after a
-  competitive audit found every local competitor offering WhatsApp contact
-  and TAL offering none. Update both the `tel:` link and the `wa.me` link
-  together if the number ever changes; they're two separate hardcoded
-  occurrences, not derived from one setting.
+- **Contact details are now all real — the `contact@yourdomain.com`
+  placeholder is gone.** The email, phone number and WhatsApp link are the
+  academy's actual details (deliberately not repeated in this file — see
+  `templates/partials/footer.html` for the values). Don't strip any of them.
+  Two things to know before editing:
+  - **Each value is hardcoded in more than one place.** The email appears
+    in the footer, on the contact page, and in the `LocalBusiness` JSON-LD
+    in `base.html`; the phone number appears as a `tel:` link and again as
+    a `wa.me` link (same digits, no `+` and no spaces) plus the same
+    JSON-LD. None of them derive from a single setting, so changing one
+    means changing all of its occurrences — grep before assuming.
+  - **`email` is in the structured data now, `streetAddress` still isn't.**
+    The rule there is that structured data only ever carries verified
+    values (see "SEO" below); email qualified once a real inbox existed,
+    and the street address still doesn't, since the site points at a Google
+    Maps listing instead of publishing an address.
+  The WhatsApp link was added after a competitive audit found every local
+  competitor offering WhatsApp contact and TAL offering none.
+- **`ACADEMY_NOTIFICATION_EMAIL` / `DEFAULT_FROM_EMAIL` are separate from
+  the address shown on the site.** The displayed address is template copy;
+  where submission alerts actually get delivered is env config, still unset
+  (see "Configure email" below). Setting one does not set the other.
 - **The street address placeholder has been resolved, differently than
   originally planned.** Rather than eventually swapping "Academy Hall,
   Downtown Centre" for a real street address, every on-site mention of the

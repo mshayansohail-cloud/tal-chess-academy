@@ -22,11 +22,12 @@
 
   {% comment %}
     LocalBusiness + EducationalOrganization: only fields with real values
-    are included. streetAddress and email are deliberately left out — both
-    are still placeholders (see README "Current status") and structured
-    data is a machine-readable factual claim, not display copy, so a
-    placeholder doesn't belong here the way it can in visible text pending
-    a real value.
+    are included. `email` was previously left out alongside streetAddress
+    while it was still a placeholder, and was added once a real inbox
+    existed. streetAddress is still absent for that same reason (see README
+    "Current status") — structured data is a machine-readable factual
+    claim, not display copy, so a placeholder doesn't belong here the way
+    it can in visible text pending a real value.
   {% endcomment %}
   <script type="application/ld+json">
   {
@@ -36,6 +37,7 @@
     "description": "TAL Chess Academy trains players in Karachi from first moves to tournament mastery, with structured coaching built on a clear, level-by-level curriculum.",
     "url": "{{ request.scheme }}://{{ request.get_host }}/",
     "telephone": "+923483186131",
+    "email": "info@talchessacademy.com",
     "address": {
       "@type": "PostalAddress",
       "addressLocality": "Karachi",

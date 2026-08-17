@@ -1014,13 +1014,17 @@
   color: var(--text-primary);
 }
 
-.footer__links a.footer-location {
+/* One row of the footer's Contact column: a gold icon, the channel name,
+   and the value beneath it. Was .footer-location when the map link was the
+   only thing using it; renamed once email, phone and WhatsApp adopted the
+   same shape, since the old name no longer described any of them. */
+.footer__links a.footer-contact {
   display: inline-flex;
   align-items: flex-start;
   gap: var(--space-2);
 }
 
-.footer-location__icon {
+.footer-contact__icon {
   width: 14px;
   height: 14px;
   margin-top: 3px;
@@ -1028,18 +1032,24 @@
   color: var(--color-gold);
 }
 
-.footer-location__cue {
+.footer-contact__cue {
   display: block;
   margin-top: 2px;
   font-size: var(--fs-2xs);
   letter-spacing: var(--tracking-wide);
-  text-transform: uppercase;
+  /* Deliberately not uppercased: an email address and a phone number are
+     literal values a visitor may copy, unlike the map link's "View on
+     Google Maps" prompt, so they're shown exactly as they're written. */
   color: var(--color-gold);
   transition: color var(--duration-fast) var(--ease-out);
 }
 
-.footer-location:hover .footer-location__cue,
-.footer-location:focus-visible .footer-location__cue {
+.footer-contact--prompt .footer-contact__cue {
+  text-transform: uppercase;
+}
+
+.footer-contact:hover .footer-contact__cue,
+.footer-contact:focus-visible .footer-contact__cue {
   color: var(--text-primary);
 }
 

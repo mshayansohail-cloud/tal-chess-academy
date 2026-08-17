@@ -37,20 +37,41 @@
 
       <div>
         <h3 class="footer__heading">Contact</h3>
+        {% comment %}
+          Every row here is the same shape — icon, what the channel is, then
+          the value underneath — so the column scans as one list rather than
+          two bare links sitting above two labelled ones.
+        {% endcomment %}
         <ul class="footer__links">
-          <li><a href="mailto:contact@yourdomain.com">contact@yourdomain.com</a></li>
-          <li><a href="tel:+923483186131">+92 348 3186131</a></li>
+          <li>
+            <a href="mailto:info@talchessacademy.com" class="footer-contact">
+              <svg class="footer-contact__icon" viewBox="0 0 24 24" aria-hidden="true"><use href="#icon-mail"></use></svg>
+              <span>
+                Email
+                <span class="footer-contact__cue">info@talchessacademy.com</span>
+              </span>
+            </a>
+          </li>
+          <li>
+            <a href="tel:+923483186131" class="footer-contact">
+              <svg class="footer-contact__icon" viewBox="0 0 24 24" aria-hidden="true"><use href="#icon-phone"></use></svg>
+              <span>
+                Phone
+                <span class="footer-contact__cue">+92 348 3186131</span>
+              </span>
+            </a>
+          </li>
           <li>
             <a
               href="https://wa.me/923483186131"
               target="_blank"
               rel="noopener noreferrer"
-              class="footer-location"
+              class="footer-contact"
             >
-              <svg class="footer-location__icon" viewBox="0 0 24 24" aria-hidden="true"><use href="#icon-whatsapp"></use></svg>
+              <svg class="footer-contact__icon" viewBox="0 0 24 24" aria-hidden="true"><use href="#icon-whatsapp"></use></svg>
               <span>
                 WhatsApp
-                <span class="footer-location__cue">+92 348 3186131</span>
+                <span class="footer-contact__cue">+92 348 3186131</span>
               </span>
             </a>
           </li>
@@ -59,12 +80,12 @@
               href="https://maps.app.goo.gl/GR9WaFxk5Cx3HJqL9"
               target="_blank"
               rel="noopener noreferrer"
-              class="footer-location"
+              class="footer-contact footer-contact--prompt"
             >
-              <svg class="footer-location__icon" viewBox="0 0 24 24" aria-hidden="true"><use href="#icon-pin"></use></svg>
+              <svg class="footer-contact__icon" viewBox="0 0 24 24" aria-hidden="true"><use href="#icon-pin"></use></svg>
               <span>
                 TAL Chess Academy
-                <span class="footer-location__cue">View on Google Maps</span>
+                <span class="footer-contact__cue">View on Google Maps</span>
               </span>
             </a>
           </li>
