@@ -460,6 +460,190 @@
   margin-bottom: 0;
 }
 
+/* ---- Per-session pricing ----
+   Two rates sitting side by side on one line each, so adding price costs a
+   programme row about one line of height rather than a block. The format
+   label carries the gold eyebrow treatment already used by
+   .program-row__age, so this reads as part of the existing row rather than
+   a panel bolted onto it.
+
+   The unit is spelled out in full on every price ("per 60-min session")
+   instead of once as a footnote: these are per-session rates, and a reader
+   scanning a single figure has to be unable to mistake it for a monthly
+   one. */
+.session-price {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3) var(--space-6);
+  margin-top: var(--space-4);
+}
+
+.session-price__item {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.session-price__format {
+  font-size: var(--fs-2xs);
+  letter-spacing: var(--tracking-wide);
+  text-transform: uppercase;
+  color: var(--color-gold);
+}
+
+.session-price__value {
+  margin: 0;
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.session-price__amount {
+  font-family: var(--font-display);
+  font-size: var(--fs-md);
+  color: var(--text-primary);
+  font-variant-numeric: tabular-nums;
+}
+
+.session-price__unit {
+  font-size: var(--fs-2xs);
+  color: var(--text-muted);
+}
+
+/* Ivory sections (About page) need the darker gold to stay legible — the
+   same swap the rest of the site makes on this surface. */
+.surface-inverse .session-price__format {
+  color: var(--color-gold-contrast);
+}
+
+.surface-inverse .session-price__amount {
+  color: var(--text-inverse);
+}
+
+/* ---- Rate comparison table (/programs/) ----
+   Hairline rules and generous row padding, matching .program-row above,
+   so the table reads as the same material as the rest of the page rather
+   than a component from somewhere else. */
+.rate-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: var(--space-7);
+}
+
+.rate-table th,
+.rate-table td {
+  text-align: left;
+  padding: var(--space-4) var(--space-4) var(--space-4) 0;
+  border-bottom: 1px solid var(--border-hairline);
+  vertical-align: baseline;
+}
+
+.rate-table thead th {
+  font-family: var(--font-body);
+  font-size: var(--fs-2xs);
+  font-weight: 400;
+  letter-spacing: var(--tracking-wide);
+  text-transform: uppercase;
+  color: var(--color-gold);
+  border-bottom-color: var(--color-gold-dim);
+}
+
+.rate-table tbody th {
+  font-family: var(--font-display);
+  font-size: var(--fs-md);
+  font-weight: 500;
+  color: var(--text-primary);
+  white-space: nowrap;
+}
+
+.rate-table__amount {
+  display: block;
+  font-family: var(--font-display);
+  font-size: var(--fs-md);
+  color: var(--text-primary);
+  font-variant-numeric: tabular-nums;
+}
+
+.rate-table__unit {
+  display: block;
+  margin-top: 2px;
+  font-size: var(--fs-2xs);
+  color: var(--text-muted);
+}
+
+.rate-note {
+  margin-top: var(--space-5);
+  max-width: 62ch;
+  font-size: var(--fs-sm);
+  color: var(--text-muted);
+}
+
+/* Below 640px the column headers stop being useful — three columns leave
+   each price roughly 90px, which is why so many responsive tables end up
+   scrolling sideways. Instead each row becomes its own block and each cell
+   carries its own label from data-label, so the format is stated next to
+   the figure it belongs to and nothing overflows. */
+@media (max-width: 640px) {
+  .rate-table thead {
+    /* Not display:none — that would drop the header from the a11y tree.
+       Off-screen keeps the column names available to screen readers. */
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+
+  .rate-table,
+  .rate-table tbody,
+  .rate-table tr,
+  .rate-table th,
+  .rate-table td {
+    display: block;
+    width: auto;
+  }
+
+  .rate-table tr {
+    padding-block: var(--space-5);
+    border-bottom: 1px solid var(--border-hairline);
+  }
+
+  .rate-table tr:last-child {
+    border-bottom: none;
+  }
+
+  .rate-table tbody th {
+    padding: 0 0 var(--space-3);
+    border-bottom: none;
+    white-space: normal;
+  }
+
+  .rate-table td {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: var(--space-4);
+    padding: var(--space-2) 0;
+    border-bottom: none;
+  }
+
+  .rate-table td::before {
+    content: attr(data-label);
+    font-size: var(--fs-2xs);
+    letter-spacing: var(--tracking-wide);
+    text-transform: uppercase;
+    color: var(--color-gold);
+    flex-shrink: 0;
+  }
+
+  .rate-table__amount,
+  .rate-table__unit {
+    text-align: right;
+  }
+}
+
 @media (max-width: 700px) {
   .program-row {
     grid-template-columns: 1fr;
@@ -1436,6 +1620,22 @@
 
 .form-legend span {
   color: var(--color-gold);
+}
+
+/* Live rate readout under the programme/format pair. A quiet inset note
+   rather than a panel — it is confirming a choice the visitor just made,
+   not selling. */
+.form-rate {
+  margin-bottom: var(--space-5);
+  padding: var(--space-3) var(--space-4);
+  border-left: 2px solid var(--color-gold-dim);
+  background: var(--surface-secondary);
+  font-size: var(--fs-sm);
+  color: var(--text-primary);
+}
+
+.form-rate[hidden] {
+  display: none;
 }
 
 .form-input {

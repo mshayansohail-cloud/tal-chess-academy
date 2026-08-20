@@ -30,7 +30,22 @@ def faq(request):
 
 
 def programs(request):
-    return render(request, "academy/programs.html", {"programs": Program.objects.filter(is_active=True)})
+    active = Program.objects.filter(is_active=True)
+    # Only programmes with BOTH rates belong in the comparison table — a row
+    # with a blank cell would read as "free" or "unavailable" rather than
+    # "quoted individually", which is what Junior and Private actually are.
+    priced = [p for p in active if p.price_online and p.price_in_person]
+    return render(
+        request,
+        "academy/programs.html",
+        {
+            "programs": active,
+            "priced_programs": priced,
+            # Every published rate uses the same session length; the table
+            # says it once in the intro rather than per cell.
+            "session_minutes": priced[0].session_minutes if priced else None,
+        },
+    )
 
 
 def coaches(request):

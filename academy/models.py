@@ -37,6 +37,29 @@ class Program(models.Model):
     duration = models.CharField(max_length=60, blank=True, help_text='e.g. "12-week term"')
     icon = models.CharField(max_length=20, choices=Icon.choices, default=Icon.PAWN)
     cta_label = models.CharField(max_length=40, default='View curriculum')
+
+    # Rates live here rather than in a template so staff can change them in
+    # admin without a deploy, and so every surface that quotes a price reads
+    # the same number. Both are per single session of `session_minutes`, NOT
+    # per month or per term.
+    #
+    # Null means "no published rate" — not "free". A programme without one
+    # simply shows no price and keeps its enquiry CTA, which is how Junior
+    # and Private Coaching behave: their rates vary, so quoting a single
+    # figure would be inventing one.
+    price_online = models.PositiveIntegerField(
+        null=True, blank=True,
+        help_text='PKR for one online session. Leave blank if there is no single published rate.',
+    )
+    price_in_person = models.PositiveIntegerField(
+        null=True, blank=True,
+        help_text='PKR for one face-to-face session. Leave blank if there is no single published rate.',
+    )
+    session_minutes = models.PositiveSmallIntegerField(
+        default=60,
+        help_text='Length of one session, in minutes — the unit both prices above refer to.',
+    )
+
     is_active = models.BooleanField(default=True, help_text='Inactive programs are hidden from the site and API.')
     display_order = models.PositiveIntegerField(default=0, help_text='Lower numbers are shown first.')
     created_at = models.DateTimeField(auto_now_add=True)
@@ -65,6 +88,10 @@ class TrialRegistration(models.Model):
         ENROLLED = 'enrolled', 'Enrolled'
         CLOSED = 'closed', 'Rejected / Closed'
 
+    class SessionFormat(models.TextChoices):
+        ONLINE = 'online', 'Online'
+        IN_PERSON = 'in_person', 'Face-to-face'
+
     student_name = models.CharField(max_length=120)
     parent_name = models.CharField(
         max_length=120, blank=True, help_text='Leave blank for adult students registering themselves.'
@@ -74,6 +101,13 @@ class TrialRegistration(models.Model):
     email = models.EmailField()
     chess_level = models.CharField(max_length=20, choices=ChessLevel.choices, default=ChessLevel.NONE)
     program = models.ForeignKey(Program, on_delete=models.PROTECT, related_name='registrations')
+    # Which rate the enquiry relates to, and a genuine scheduling constraint
+    # for whoever follows up. Blank stays allowed so that rows created before
+    # this field existed remain valid.
+    session_format = models.CharField(
+        max_length=20, choices=SessionFormat.choices, blank=True,
+        help_text='Whether the enquirer asked about online or face-to-face sessions.',
+    )
     preferred_schedule = models.CharField(
         max_length=200, blank=True, help_text='Preferred days/times, in the applicant\'s own words.'
     )

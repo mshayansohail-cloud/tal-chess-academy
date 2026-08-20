@@ -1,10 +1,41 @@
-{% comment %} Expects: program (Program instance) {% endcomment %}
+{% load humanize %}
+{% comment %}
+  Expects: program (Program instance)
+
+  Pricing renders only when the programme actually has a published rate.
+  Junior and Private Coaching have none, so they fall through to their
+  enquiry CTA alone rather than showing a placeholder or a borrowed figure.
+{% endcomment %}
 <div class="program-row" data-reveal>
   <svg class="program-row__icon" viewBox="0 0 48 48" aria-hidden="true"><use href="#icon-{{ program.icon }}"></use></svg>
   <div>
     <span class="program-row__age">{{ program.age_group }}{% if program.duration %} · {{ program.duration }}{% endif %}</span>
     <h3 class="program-row__name">{{ program.name }}</h3>
     <p class="program-row__summary">{{ program.description }}</p>
+
+    {% if program.price_online or program.price_in_person %}
+      <dl class="session-price">
+        {% if program.price_online %}
+          <div class="session-price__item">
+            <dt class="session-price__format">Online</dt>
+            <dd class="session-price__value">
+              <span class="session-price__amount">PKR&nbsp;{{ program.price_online|intcomma }}</span>
+              <span class="session-price__unit">per {{ program.session_minutes }}-min session</span>
+            </dd>
+          </div>
+        {% endif %}
+        {% if program.price_in_person %}
+          <div class="session-price__item">
+            <dt class="session-price__format">Face-to-face</dt>
+            <dd class="session-price__value">
+              <span class="session-price__amount">PKR&nbsp;{{ program.price_in_person|intcomma }}</span>
+              <span class="session-price__unit">per {{ program.session_minutes }}-min session</span>
+            </dd>
+          </div>
+        {% endif %}
+      </dl>
+    {% endif %}
+
     {% if program.highlights %}
       <details class="program-row__highlights">
         <summary>What you'll learn</summary>

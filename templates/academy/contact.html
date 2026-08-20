@@ -164,16 +164,45 @@
             </div>
           </div>
 
-          <div class="form-row">
-            <label class="form-label" for="id_program">Program <span class="required-marker" aria-hidden="true">*</span></label>
-            <select class="form-input" id="id_program" name="program" aria-describedby="id_program_error" required>
-              <option value="">Select a program…</option>
-              {% for program in programs %}
-                <option value="{{ program.id }}"{% if program.slug == selected_program_slug %} selected{% endif %}>{{ program.name }}</option>
-              {% endfor %}
-            </select>
-            <p class="form-errors" id="id_program_error" data-error-for="program"></p>
+          <div class="form-row form-row--split">
+            <div>
+              <label class="form-label" for="id_program">Program <span class="required-marker" aria-hidden="true">*</span></label>
+              {% comment %}
+                Rates ride along as data attributes so the readout below can
+                update without a round trip. Absent attributes (Junior,
+                Private Coaching) are what tell forms.js to show the
+                "quoted individually" line instead of a figure.
+              {% endcomment %}
+              <select class="form-input" id="id_program" name="program" aria-describedby="id_program_error" required>
+                <option value="">Select a program…</option>
+                {% for program in programs %}
+                  <option
+                    value="{{ program.id }}"
+                    {% if program.price_online %}data-price-online="{{ program.price_online }}"{% endif %}
+                    {% if program.price_in_person %}data-price-in-person="{{ program.price_in_person }}"{% endif %}
+                    data-session-minutes="{{ program.session_minutes }}"
+                    {% if program.slug == selected_program_slug %} selected{% endif %}
+                  >{{ program.name }}</option>
+                {% endfor %}
+              </select>
+              <p class="form-errors" id="id_program_error" data-error-for="program"></p>
+            </div>
+            <div>
+              <label class="form-label" for="id_session_format">Format <span class="required-marker" aria-hidden="true">*</span></label>
+              <select class="form-input" id="id_session_format" name="session_format" aria-describedby="id_session_format_error" required>
+                <option value="online">Online</option>
+                <option value="in_person">Face-to-face</option>
+              </select>
+              <p class="form-errors" id="id_session_format_error" data-error-for="session_format"></p>
+            </div>
           </div>
+
+          {% comment %}
+            Shows the rate for the current programme/format pair. Populated by
+            forms.js; stays empty (and hidden) without JavaScript, since the
+            full table on /programs/ is the non-JS path.
+          {% endcomment %}
+          <p class="form-rate" id="session-rate" data-session-rate role="status" aria-live="polite" hidden></p>
 
           <div class="form-row">
             <label class="form-label" for="id_preferred_schedule">Preferred days/times</label>

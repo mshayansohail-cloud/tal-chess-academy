@@ -5,15 +5,30 @@ from .models import ContactSubmission, Program, TrialRegistration
 
 @admin.register(Program)
 class ProgramAdmin(admin.ModelAdmin):
-    list_display = ('name', 'skill_level', 'age_group', 'duration', 'is_active', 'display_order')
-    list_editable = ('is_active', 'display_order')
+    list_display = (
+        'name', 'skill_level', 'age_group', 'price_online', 'price_in_person',
+        'is_active', 'display_order',
+    )
+    list_editable = ('price_online', 'price_in_person', 'is_active', 'display_order')
     list_filter = ('skill_level', 'is_active')
     search_fields = ('name', 'description', 'age_group')
     prepopulated_fields = {'slug': ('name',)}
     ordering = ('display_order', 'name')
-    fields = (
-        'name', 'slug', 'description', 'highlights', 'skill_level', 'age_group', 'duration',
-        'icon', 'cta_label', 'is_active', 'display_order',
+    fieldsets = (
+        (None, {
+            'fields': (
+                'name', 'slug', 'description', 'highlights', 'skill_level', 'age_group',
+                'duration', 'icon', 'cta_label', 'is_active', 'display_order',
+            ),
+        }),
+        ('Session rates', {
+            'fields': ('price_online', 'price_in_person', 'session_minutes'),
+            'description': (
+                'PKR per single session. Leave both blank for programmes quoted '
+                'individually — the site then shows the enquiry link instead of a '
+                'price, rather than displaying zero.'
+            ),
+        }),
     )
 
 
@@ -36,8 +51,11 @@ class SubmissionAdminBase(admin.ModelAdmin):
 
 @admin.register(TrialRegistration)
 class TrialRegistrationAdmin(SubmissionAdminBase):
-    list_display = ('student_name', 'program', 'chess_level', 'student_age', 'status', 'submitted_at')
-    list_filter = ('status', 'program', 'chess_level', 'submitted_at')
+    list_display = (
+        'student_name', 'program', 'session_format', 'chess_level', 'student_age',
+        'status', 'submitted_at',
+    )
+    list_filter = ('status', 'program', 'session_format', 'chess_level', 'submitted_at')
     search_fields = ('student_name', 'parent_name', 'email', 'phone')
     actions = ['mark_contacted', 'mark_trial_scheduled', 'mark_enrolled', 'mark_closed']
 
@@ -45,7 +63,8 @@ class TrialRegistrationAdmin(SubmissionAdminBase):
         ('Applicant', {
             'fields': (
                 'student_name', 'parent_name', 'student_age', 'phone', 'email',
-                'chess_level', 'program', 'preferred_schedule', 'message', 'submitted_at',
+                'chess_level', 'program', 'session_format', 'preferred_schedule',
+                'message', 'submitted_at',
             ),
         }),
         ('Staff use', {

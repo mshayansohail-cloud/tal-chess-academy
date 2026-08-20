@@ -60,6 +60,57 @@
     ageInput.addEventListener("input", syncParentNameRequirement);
   }
 
+  /* Live session rate for the chosen programme + format.
+
+     Reads the figures straight off the selected <option>, so there is one
+     source of truth (the Program model) and no second copy of the price
+     list living in JavaScript. A programme with no published rate shows
+     what actually applies — that it is quoted individually — rather than a
+     zero or a guess.
+
+     Deliberately worded to keep the trial and the rate distinct: this is
+     what a session costs, and booking a trial is still an enquiry. */
+  var programSelect = document.getElementById("id_program");
+  var formatSelect = document.getElementById("id_session_format");
+  var rateOutput = document.querySelector("[data-session-rate]");
+
+  function formatPKR(value) {
+    // "1500" -> "1,500". Intl is available everywhere this site supports.
+    return "PKR " + Number(value).toLocaleString("en-US");
+  }
+
+  function syncSessionRate() {
+    if (!programSelect || !formatSelect || !rateOutput) return;
+
+    var option = programSelect.options[programSelect.selectedIndex];
+    if (!option || !option.value) {
+      rateOutput.hidden = true;
+      rateOutput.textContent = "";
+      return;
+    }
+
+    var online = formatSelect.value === "online";
+    var amount = option.getAttribute(online ? "data-price-online" : "data-price-in-person");
+    var minutes = option.getAttribute("data-session-minutes") || "60";
+    var formatLabel = online ? "online" : "face-to-face";
+
+    if (!amount) {
+      rateOutput.textContent =
+        option.text + " is quoted individually — we'll confirm the rate when we reply.";
+    } else {
+      rateOutput.textContent =
+        option.text + ", " + formatLabel + ": " + formatPKR(amount) +
+        " per " + minutes + "-minute session.";
+    }
+    rateOutput.hidden = false;
+  }
+
+  if (programSelect && formatSelect && rateOutput) {
+    programSelect.addEventListener("change", syncSessionRate);
+    formatSelect.addEventListener("change", syncSessionRate);
+    syncSessionRate(); // reflect a program pre-selected via ?program=
+  }
+
   function showFeedback(message, isError) {
     if (!feedback) return;
     feedback.textContent = message;

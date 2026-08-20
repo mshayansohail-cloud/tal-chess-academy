@@ -1,7 +1,8 @@
 {% extends "base.html" %}
+{% load humanize %}
 
 {% block title %}Chess Programs for Every Level — TAL Chess Academy{% endblock %}
-{% block meta_description %}Structured chess programmes for juniors, beginners, intermediate and advanced players, plus one-to-one private coaching.{% endblock %}
+{% block meta_description %}Structured chess programmes for juniors, beginners, intermediate and advanced players, plus one-to-one private coaching. Online sessions from PKR 1,500 and face-to-face from PKR 2,500 per 60-minute session.{% endblock %}
 {% block og_title %}Chess Programs for Every Level — TAL Chess Academy{% endblock %}
 {% block og_description %}Structured chess programmes for juniors, beginners, intermediate and advanced players, plus one-to-one private coaching.{% endblock %}
 
@@ -27,6 +28,63 @@
     </div>
   </div>
 </section>
+
+{% if priced_programs %}
+<section class="section section--tight surface-secondary" id="pricing" aria-labelledby="pricing-title">
+  <div class="container">
+    <div class="section-head">
+      <div>
+        <p class="section-label">Session Rates</p>
+        <h2 class="section-title" id="pricing-title">What a session costs</h2>
+      </div>
+      <p class="section-intro">
+        Every rate below is for a single {{ session_minutes }}-minute session — not a month
+        and not a term. Junior and Private Coaching are quoted individually.
+      </p>
+    </div>
+
+    {% comment %}
+      A real <table>, because this genuinely is tabular data (programme ×
+      format) and screen readers can then announce each figure with its row
+      and column. Below 640px the same markup restyles into stacked
+      groups — see .rate-table in components.css — rather than becoming a
+      horizontally scrolling grid, which is unusable on a phone.
+    {% endcomment %}
+    <table class="rate-table" data-reveal>
+      <caption class="visually-hidden">
+        Price per {{ session_minutes }}-minute session in Pakistani rupees, by programme and format
+      </caption>
+      <thead>
+        <tr>
+          <th scope="col">Programme</th>
+          <th scope="col">Online</th>
+          <th scope="col">Face-to-face</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for program in priced_programs %}
+          <tr>
+            <th scope="row">{{ program.name }}</th>
+            <td data-label="Online">
+              <span class="rate-table__amount">PKR&nbsp;{{ program.price_online|intcomma }}</span>
+              <span class="rate-table__unit">per {{ program.session_minutes }}-min session</span>
+            </td>
+            <td data-label="Face-to-face">
+              <span class="rate-table__amount">PKR&nbsp;{{ program.price_in_person|intcomma }}</span>
+              <span class="rate-table__unit">per {{ program.session_minutes }}-min session</span>
+            </td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+
+    <p class="rate-note">
+      Booking a trial is an enquiry, not a purchase — the rates above are the standard
+      session rates, and we'll confirm how your first lesson works when we reply.
+    </p>
+  </div>
+</section>
+{% endif %}
 
 <section class="section final-cta">
   <div class="container">

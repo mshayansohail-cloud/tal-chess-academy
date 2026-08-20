@@ -6,6 +6,7 @@ Phone: {{ registration.phone }}
 Email: {{ registration.email }}
 Chess level: {{ registration.get_chess_level_display }}
 Program: {{ registration.program.name }}
+Format: {{ registration.get_session_format_display|default:"Not specified" }}
 Preferred schedule: {{ registration.preferred_schedule|default:"—" }}
 
 Message:

@@ -18,6 +18,9 @@ class ProgramSerializer(serializers.ModelSerializer):
         fields = [
             'id', 'slug', 'name', 'description', 'skill_level', 'skill_level_display',
             'age_group', 'duration', 'icon', 'cta_label', 'display_order',
+            # Null for programmes quoted individually — clients should render
+            # an enquiry prompt rather than a zero.
+            'price_online', 'price_in_person', 'session_minutes',
         ]
 
 
@@ -33,7 +36,7 @@ class TrialRegistrationSerializer(serializers.ModelSerializer):
         model = TrialRegistration
         fields = [
             'student_name', 'parent_name', 'student_age', 'phone', 'email', 'chess_level',
-            'program', 'preferred_schedule', 'message', 'website',
+            'program', 'session_format', 'preferred_schedule', 'message', 'website',
         ]
 
     def validate_student_name(self, value):

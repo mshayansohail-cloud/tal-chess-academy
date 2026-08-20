@@ -93,6 +93,9 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'django.contrib.sitemaps',
+    # Provides the `intcomma` filter used to render prices as "PKR 1,500"
+    # rather than "PKR 1500".
+    'django.contrib.humanize',
     'rest_framework',
     'axes',
     'academy',

@@ -6,6 +6,7 @@ one business day to confirm a time.
 
 What you submitted:
   Program: {{ registration.program.name }}
+  Format: {{ registration.get_session_format_display|default:"Not specified" }}
   Preferred schedule: {{ registration.preferred_schedule|default:"Not specified" }}
 
 If anything above isn't right, just reply to this email and let us know.
